@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/railgun/STROBE"
+	"$nocull" 1
+}

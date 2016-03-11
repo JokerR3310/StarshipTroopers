@@ -1,0 +1,5 @@
+"VertexLitGeneric"
+{
+	"$baseTexture" "Models/humans\deltaforce/breen_sheet"
+        "$halflambert" 1
+}

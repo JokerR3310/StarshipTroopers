@@ -1,0 +1,35 @@
+"starshiptroopers"
+{
+	"base"		"base"
+	"title"		"Starship Troopers"
+	"maps"		"^st_"
+	"menusystem"	"1"
+
+	"settings"
+	{
+		1
+		{
+			"name"		"sbox_godmode"
+			"text"		"god_mode"
+			"help"		"When enabled all players will be invincible"
+			"type"		"CheckBox"
+			"default"	"0"
+		}
+		2
+		{
+			"name"		"sbox_noclip"
+			"text"		"noclip"
+			"help"		"When enabled players will be able to noclip"
+			"type"		"CheckBox"
+			"default"	"0"
+		}
+		3
+		{
+			"name"		"sbox_playershurtplayers"	
+			"text"		"players_damage_players"
+			"help"		"If enabled player's will be able to hurt each other"
+			"type"		"CheckBox"
+			"default"	"0"
+		}
+	}
+}

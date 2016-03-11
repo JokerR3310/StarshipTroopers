@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models\weapons\rivet_alphed"
+	 $translucent 1
+ }

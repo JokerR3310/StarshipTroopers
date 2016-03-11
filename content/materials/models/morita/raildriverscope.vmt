@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/morita/RAILDRIVERSCOPE"
+	"$bumpmap" "models/morita/RAILDRIVERSCOPE_N"
+	"$nocull" "1"
+}

@@ -1,0 +1,7 @@
+"UnlitGeneric"
+{
+	"$basetexture" "weapons/st_carbine_short"
+	"$nolod" 1
+	"$vertexalpha" 1
+	"$vertexcolor" 1
+}

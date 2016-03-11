@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models\weapons\crate_mark2"
+	"$bumpmap" "models\weapons\crate_mark2_N"
+ }

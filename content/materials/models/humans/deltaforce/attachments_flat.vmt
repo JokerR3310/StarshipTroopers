@@ -1,0 +1,6 @@
+"VertexLitGeneric"
+
+{
+	"$basetexture"			"models\humans\deltaforce\attachments_flat"
+	"$halflambert" 			"1"
+}

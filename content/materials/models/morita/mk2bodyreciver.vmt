@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/morita/MK2BODYRECIVER"
+	"$bumpmap" "models/morita/MK2BODYRECIVER_N"
+	"$nocull" "1"
+}

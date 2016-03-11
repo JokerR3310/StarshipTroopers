@@ -1,0 +1,12 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models\predatorcz\tanker_bug/head"
+	"$bumpmap" "models\predatorcz\tanker_bug/Tank_head_n"
+	 "$selfillum" 1
+	"$nocull" 1
+	"$halflambert" 1
+
+	"$phong" 							"1"
+	$phongboost	1
+	$phongfresnelranges	"[0.05 0.5 1]"
+}

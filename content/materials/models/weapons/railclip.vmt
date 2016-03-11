@@ -1,0 +1,5 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models\weapons\railclip"
+	"$bumpmap" "models\weapons\railclip_N"
+ }

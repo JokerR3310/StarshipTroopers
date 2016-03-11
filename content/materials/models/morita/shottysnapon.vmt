@@ -1,0 +1,6 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/morita/SHOTTYSNAPON"
+	"$bumpmap" "models/morita/SHOTTYSNAPON_N"
+	"$nocull" "1"
+}

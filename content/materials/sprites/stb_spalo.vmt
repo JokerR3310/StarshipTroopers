@@ -1,0 +1,23 @@
+"Sprite"
+{
+$spriteorientation vp_oriented
+"$spriteorigin" "[ 0.50 0.50 ]"
+	"$basetexture" "sprites/stb_electric"
+     "$additive" "1"
+  $frame 10	
+           
+           "Proxies"
+	{
+       "AnimatedTexture"
+		{
+			"animatedtexturevar" "$basetexture"
+			"animatedtextureframenumvar" "$frame"
+			"animatedtextureframerate" "20.00" 
+		}
+         
+  }
+
+}
+      
+	
+        

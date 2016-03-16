@@ -24,7 +24,7 @@ SWEP.ScopeScale = 0.5
 
 function SWEP:Initialize()
 	self.Weapon:SetNWBool("Reloading", false)
-	self:SetWeaponHoldType(self.HoldType)
+	self:SetHoldType(self.HoldType)
 end
 
 function SWEP:Precache()

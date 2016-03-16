@@ -51,7 +51,7 @@ function SWEP:Holster()
 end
 
 function SWEP:Deploy()
-	self:SetWeaponHoldType( self.HoldType )
+	self:SetHoldType( self.HoldType )
 
 	self:CallOnClient("Deploy",0)
 	local seq = self:LookupSequence("draw")

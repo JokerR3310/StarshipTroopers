@@ -82,24 +82,32 @@ local function targetpos_default(t)
 	return t:BodyTarget(t:GetPos())
 end
 
--- from HL2 bone
+--[[ from HL2 bone
 local function targetpos_hl2(t)
 	local bone = t:LookupBone("ValveBiped.Bip01_Spine2")
 	if bone then return t:GetBonePosition(bone) end
 end
-
+]]
 -- from bounding box
 local function targetpos_bb(t)
 	return t:LocalToWorld(t:OBBCenter())
 end
 
-local targetmethods = {targetpos_default, targetpos_hl2, targetpos_bb}
+--local targetmethods = {targetpos_default, targetpos_hl2, targetpos_bb}
+local targetmethods = {targetpos_default, targetpos_bb}
 local targetmethodnames = {
 	"bodytarget",
-	"hl2 spine",
+	--"hl2 spine",
 	"bounding box",
 }
 local CURRENT_SELF
+
+local enemylist = {
+	"npc_antlion", 
+	"npc_antlion_worker", 
+	"npc_antlionguard", 
+	"bug_tanker"
+}
 
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)
@@ -110,25 +118,33 @@ end
 
 -- Find the most suitable target position retrieving method for a given entity
 -- (returns nil if the entity cannot be reached)
-function ENT:GetTargetMethod(ent, strict, dbg)
+
+function ENT:GetTargetMethod(ent, strict)
 	local startpos = self:TargetOrigin()
-	
-	if dbg then print(tostring(ent)) end
-	for i,method in ipairs(targetmethods) do
-		if dbg then print(targetmethodnames[i]) end
+
+	--print(tostring(ent)) 
+	for i, method in ipairs(targetmethods) do
+
+		--print(targetmethodnames[i]) 
+
 		local pos = method(ent)
 		if pos then
 			CURRENT_SELF = self
-			local tr = util.TraceLine({start=startpos, endpos=pos, filter=self})
+			local tr = util.TraceLine({
+				start=startpos, 
+				endpos=pos, 
+				filter=self--,
+				--filter = function( ent ) if table.HasValue(enemylist, ent:GetClass()) and self then return true end end
+			})
 			CURRENT_SELF = nil
 			if tr.Entity == ent or (not strict and tr.StartSolid) then
-				if dbg then print("OK!\n") end
+				--print("OK!\n") 
 				return method
 			else
-				if dbg then print("Failure! (entity hit: %s)\n", tostring(tr.Entity)) end
+				--print("Failure! (entity hit: %s)\n", tostring(tr.Entity)) 
 			end
 		else
-			if dbg then print("Failure! (no position found)\n") end
+			--print("Failure! (no position found)\n") 
 		end
 	end
 end
@@ -305,14 +321,15 @@ function ENT:ShootBullets()
 	return true
 end
 
-function ENT:FindTarget(dbg)
+function ENT:FindTarget()
 	local Target, MinDist, Method
-	local NpcIist = {"npc_antlion", "npc_antlion_worker", "npc_antlionguard", "bug_tanker"}
-	for _,v in pairs(ents.FindInSphere(self:GetPos(), self.Range)) do
-		if v:IsNPC() and v:Health() > 0 and (table.HasValue(NpcIist, v:GetClass())) then
-			local d = self:GetPos():Distance(v:GetPos())
+	for _, v in pairs(ents.FindInSphere(self:GetPos(), self.Range)) do
+		if v:IsNPC() and v:Health() > 0 and table.HasValue(enemylist, v:GetClass()) then
+			local d = self:GetPos():Distance(v:GetPos()) -- Distance
+			--local dr = self:GetPos():DistToSqr(v:GetPos())
+			--print("Dist: "..d, "  ToSqr: "..dr)
 			if not MinDist or d<MinDist then
-				local method = self:GetTargetMethod(v, true, dbg)
+				local method = self:GetTargetMethod(v, true)
 				if method then
 					Target = v
 					MinDist = d
@@ -321,6 +338,7 @@ function ENT:FindTarget(dbg)
 			end
 		end
 	end
+	--print(Target, MinDist, Method)
 	
 	return Target, Method
 end
@@ -340,7 +358,7 @@ function ENT:ThinkIdle()
 		
 		self.Idle_Sound:PlayEx(1, self.SoundPitch)
 		
-		self.TargetPitch = 5*math.random(-2,2)
+		self.TargetPitch = 5 * math.random(-2, 2)
 	end
 	
 	self.VisualTurretPitch = self.TurretPitch
@@ -365,6 +383,7 @@ function ENT:ThinkTarget()
 	-- If the target gets too far away, forget about it
 	if IsValid(self.Target) and self.Target:Health()>0 and (not self.NextDistanceCheck or CurTime() > self.NextDistanceCheck) then
 		local dist = self:GetPos():Distance(self.Target:GetPos())
+		--print(self.Target)
 		if dist > self.Range then
 			self.Target = nil
 		end
@@ -433,7 +452,7 @@ function ENT:ThinkTarget()
 	if not self.NextCheckVis or CurTime()>=self.NextCheckVis then
 		local firestate = self.Firing
 		
-		if math.abs(dangnorm(self.TurretPitch,self.TargetPitch))<5 and math.abs(dangnorm(self.TurretYaw,self.TargetYaw))<5 then
+		if math.abs(dangnorm(self.TurretPitch,self.TargetPitch)) < 5 and math.abs(dangnorm(self.TurretYaw,self.TargetYaw)) < 5 then
 			firestate = true
 		else
 			firestate = false

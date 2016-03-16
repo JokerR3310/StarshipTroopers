@@ -12,7 +12,7 @@ PrecacheParticleSystem("weapon_muzzle_smoke_b")
 PrecacheParticleSystem("weapon_muzzle_flash_assaultrifle")
 
 ENT.ObjectHealth = 150
-ENT.Range = 1100
+ENT.Range = 1100 --1210000 --1100
 
 ENT.CollisionBox = {Vector(-24,-24,0), Vector(24,24,50)}
 ENT.BuildHull = {Vector(-24,-24,0), Vector(24,24,86)}

@@ -4,18 +4,12 @@ GM.Email = "N/A"
 GM.Website = "http://steamcommunity.com/sharedfiles/filedetails/?id=197393073"
 GM.Version = "BETA 0.7.8"
 
-DeriveGamemode("sandbox")
-
--- Auto Load Map config
-local LoadMap = GM.FolderName .. "/gamemode/maps/" .. game.GetMap() .. ".lua"
-if file.Exists( LoadMap, "LUA" ) then
-	include( LoadMap )
-end
+DeriveGamemode("sandbox") -- Dev mode
 
 -- Pre Load ConVars
-GM.RoundLimit = CreateConVar("wave_amount", 2, FCVAR_REPLICATED, "Total rounds amount.") -- 12
-GM.RoundLength = CreateConVar("wave_length", 60, FCVAR_REPLICATED, "Round length in seconds.") -- 120
-GM.RoundPostEndTime = CreateConVar("wave_post_end", 60, FCVAR_REPLICATED, "Seconds between round end and round start.") -- 122
+GM.RoundLimit = CreateConVar("wave_amount", 11, FCVAR_REPLICATED, "Total rounds amount.") -- 12
+GM.RoundLength = CreateConVar("wave_length", 120, FCVAR_REPLICATED, "Round length in seconds.") -- 120
+GM.RoundPostEndTime = CreateConVar("wave_post_end", 62, FCVAR_REPLICATED, "Seconds between round end and round start.") -- 62
 
 team.SetUp(1, "Player", Color(0, 0, 255))
 team.SetUp(2, "Engi", Color(0, 0, 255))
@@ -44,7 +38,6 @@ end)
 
 function GM:PlayerInitialSpawn( pl )
 	pl:SetTeam(TEAM_SPECTATOR)
-	--pl:SetTeam(1)
 	pl:Money_Create()
 	
 	PrintMessage(HUD_PRINTTALK, pl:GetName() .. " has arrived.")
@@ -54,8 +47,6 @@ function GM:PlayerInitialSpawn( pl )
 end
 
 function GM:PlayerSpawn( pl )
-	pl:StripWeapons()
-	
 	pl:SetCanZoom(false)
 	pl:Flashlight(false)
 	pl:AllowFlashlight(false)
@@ -81,7 +72,6 @@ end
 
 function GM:PlayerNoClip( pl )
 	if pl:Team() == TEAM_SPECTATOR then return false end
-	if ( game.SinglePlayer() ) then return true end
 	return GetConVar( "sbox_noclip" ):GetBool()
 end
 

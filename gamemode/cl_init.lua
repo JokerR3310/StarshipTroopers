@@ -19,8 +19,9 @@ include("mapvote/cl_mapvote.lua")
 
 include("st_config.lua")
 
-game.AddParticles( "particles/ANTLION_GIB_02.pcf" )
-game.AddParticles( "particles/ANTLION_WORKER.pcf" )
+game.AddParticles( "particles/antlion_gib_02.pcf" )
+game.AddParticles( "particles/antlion_worker.pcf" )
+game.AddParticles( "particles/sparks.pcf" )
 
 surface.CreateFont( "st_timer_text", { font = "Roboto", size = 23, weight = 600, antialias = true } )
 

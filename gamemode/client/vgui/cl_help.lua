@@ -11,6 +11,7 @@ function PANEL:Init()
 	self:SetSize(322, 362)
 	self:Center()
 	self:ShowCloseButton(false)
+	self:SetDraggable(false)
 	self:MakePopup()
 	
 	self.PropertySheet = vgui.Create("DPropertySheet", self)

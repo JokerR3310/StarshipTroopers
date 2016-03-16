@@ -47,4 +47,4 @@ end)
 
 /////// WAVE 10 ///////
 
-MsgC( Color( 255, 155, 100 ), "STG_OUTPOST 87 | Map config file Loaded!\n" )
+MsgC( Color( 255, 155, 100 ), "# STG_OUTPOST 87 | Map config file Loaded!\n" )

@@ -27,11 +27,11 @@ SWEP.Secondary.Automatic	= false
 SWEP.Secondary.Ammo			= "none"
 
 function SWEP:Initialize()
-	self:SetWeaponHoldType( self.HoldType )
+	self:SetHoldType( self.HoldType )
 end
 
 function SWEP:Deploy()
-	self:SetWeaponHoldType( self.HoldType )
+	self:SetHoldType( self.HoldType )
 	self.Weapon:SendWeaponAnim( ACT_VM_DRAW )
 	return true
 end

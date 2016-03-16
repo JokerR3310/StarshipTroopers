@@ -40,7 +40,7 @@ function SWEP:Holster()
 end
 
 function SWEP:Deploy()
-	self:SetWeaponHoldType( self.HoldType )
+	self:SetHoldType( self.HoldType )
 	return true
 end
 

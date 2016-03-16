@@ -37,7 +37,7 @@ local DenySound = Sound( "items/medshotno1.wav" )
 
 function SWEP:Initialize()
 
-	self:SetWeaponHoldType( "slam" )
+	self:SetHoldType( "slam" )
 
 	if ( CLIENT ) then return end
 

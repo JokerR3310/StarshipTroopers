@@ -22,7 +22,7 @@ SWEP.ScopeScale = 0.5
 
 function SWEP:Initialize()
 	self.Weapon:SetNWBool("Reloading", false)
-	self:SetWeaponHoldType(self.HoldType)
+	self:SetHoldType(self.HoldType)
 end
 
 function SWEP:Precache()
@@ -63,11 +63,9 @@ function SWEP:ExplodeShot()
 
 	ExplodeShot:SetOwner(self.Owner)
 	ExplodeShot:SetPos(eyetrace.HitPos)
-	ExplodeShot:SetAngles(self.Owner:GetAngles())
-	ExplodeShot:SetKeyValue("iMagnitude", "70")
+	ExplodeShot:SetKeyValue("iMagnitude", "90")
 	ExplodeShot:Fire("Explode", 0, 0)
 	ExplodeShot:Spawn()
-	ExplodeShot:Activate()
 end
 
 function SWEP:Reload()

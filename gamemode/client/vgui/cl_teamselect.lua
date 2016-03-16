@@ -5,6 +5,7 @@ function PANEL:Init()
 	self:SetSize(740, 280)
 	self:Center()
 	self:ShowCloseButton(false)
+	self:SetDraggable(false)
 	self:MakePopup()
 
 	self.icon = vgui.Create( "DModelPanel", self )

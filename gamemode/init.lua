@@ -48,12 +48,14 @@ local RegenLast = 0
 local RegenDelay = 0.06
 local pm = FindMetaTable("Player")
 
+--[[
 function GM:Initialize()
-	--if file.Exists("gamemodes/" .. string.lower( GAMEMODE.Name ) .. "/gamemode/maps/" .. string.lower( game.GetMap() ) .. ".lua", "GAME") then
-	--	include("../gamemodes/" .. string.lower( GAMEMODE.Name ) .. "/gamemode/maps/" .. string.lower( game.GetMap() ) .. ".lua")
-	--end
-	--print("Loading maps successfully completed")
+	if file.Exists("gamemodes/" .. string.lower( GAMEMODE.Name ) .. "/gamemode/maps/" .. string.lower( game.GetMap() ) .. ".lua", "GAME") then
+		include("../gamemodes/" .. string.lower( GAMEMODE.Name ) .. "/gamemode/maps/" .. string.lower( game.GetMap() ) .. ".lua")
+	end
+	print("Loading maps successfully completed")
 end
+]]
 
 function GM:GetGameDescription() 
  	return self.Name 
@@ -93,12 +95,8 @@ function GM:PlayerHurt()
 end
 
 function GM:PlayerShouldTakeDamage(ply, attacker)
-	if (game.SinglePlayer()) then return true end
-	
-	if (cvars.Bool("sbox_godmode", false )) then return false end
-	
 	if (attacker:IsValid() && attacker:IsPlayer()) then
-		return cvars.Bool( "sbox_playershurtplayers", true)
+		return false
 	end
 	return true
 end
@@ -116,11 +114,11 @@ function NPCKilled(npc, pl)
 end
 hook.Add("OnNPCKilled", "OnNPCKilled", NPCKilled)
 
-function GM:ScaleNPCDamage(npc, hit, dmg)
-	if table.HasValue(ST_FriendNPC, npc:GetClass() ) then
-		local pl = dmg:GetAttacker()
+function GM:EntityTakeDamage(target, dmginfo)
+	if (target:IsNPC() and table.HasValue(ST_FriendNPC, target:GetClass())) then
+		local pl = dmginfo:GetAttacker()
 		if pl:IsPlayer() then
-			dmg:SetDamage(0)
+			dmginfo:SetDamage(0)
 		end
 	end
 end
@@ -146,7 +144,7 @@ function PlayerDropWeapon(pl, attacker) -- Drop wep
 			
 	local phys = drop:GetPhysicsObject()
 		if phys:IsValid() then
-			phys:AddAngleVelocity(VectorRand())
+			phys:AddAngleVelocity(VectorRand()* math.Rand(20,50))
 			phys:AddVelocity(pl:GetVelocity())
 			phys:Wake()
 		end
@@ -159,8 +157,8 @@ function GM:PlayerDeathThink( pl )
 		pl:Spawn()
 end
 
-function GM:GetFallDamage( pl, vel )
-	return (vel-480)*(100/(1024-580))
+function GM:GetFallDamage( pl, speed )
+	return math.max(0, math.ceil(0.2418*speed - 141.75)) -- https://facepunch.com/showthread.php?t=1499567&p=49491153&viewfull=1#post49491153
 end
 
 function GM:PlayerUse( pl )
@@ -191,44 +189,40 @@ end
 net.Receive("TeamSelect", function(length, pl)
 	local variant = net.ReadInt(4)
 	if variant == 1 then
+		player_manager.SetPlayerClass(pl, "player_soldier")
 		if pl:Team() == TEAM_SPECTATOR then
 			pl:SetTeam(1)
-			player_manager.SetPlayerClass( pl, "player_soldier" )
 			pl:Spawn()
 		else
-			RunConsoleCommand("kill")
 			pl:SetTeam(1)
-			player_manager.SetPlayerClass( pl, "player_soldier" )
+			RunConsoleCommand("kill")
 		end
 	elseif variant == 2 then
+		player_manager.SetPlayerClass(pl, "player_engineer")
 		if pl:Team() == TEAM_SPECTATOR then
 			pl:SetTeam(2)
-			player_manager.SetPlayerClass( pl, "player_engineer" )
 			pl:Spawn()
 		else
 			RunConsoleCommand("kill")
 			pl:SetTeam(2)
-			player_manager.SetPlayerClass( pl, "player_engineer" )
 		end
 	elseif variant == 3 then
+		player_manager.SetPlayerClass(pl, "player_medic")
 		if pl:Team() == TEAM_SPECTATOR then
 			pl:SetTeam(1)
-			player_manager.SetPlayerClass( pl, "player_medic" )
 			pl:Spawn()
 		else
 			RunConsoleCommand("kill")
 			pl:SetTeam(1)
-			player_manager.SetPlayerClass( pl, "player_medic" )
 		end
 	elseif variant == 4 then
+		player_manager.SetPlayerClass(pl, "player_sniper")
 		if pl:Team() == TEAM_SPECTATOR then
 			pl:SetTeam(1)
-			player_manager.SetPlayerClass( pl, "player_sniper" )
 			pl:Spawn()
 		else
 			RunConsoleCommand("kill")
 			pl:SetTeam(1)
-			player_manager.SetPlayerClass( pl, "player_sniper" )
 		end
 	elseif variant == 5 then
 		pl:SetTeam(TEAM_SPECTATOR)
@@ -298,18 +292,33 @@ function pm:GameSync()
 	net.Send(self)
 end
 
--- CSettings
 timer.Simple(3, function()
-	RunConsoleCommand("ai_disabled", "0");
-
-	RunConsoleCommand("sv_kickerrornum", "0");
-	RunConsoleCommand("ai_ignoreplayers", "0");
-
-	RunConsoleCommand("sk_antlion_health", "40");
-	RunConsoleCommand("sk_antlion_swipe_damage", "15");
-	RunConsoleCommand("sk_antlion_jump_damage", "10");
-
-	RunConsoleCommand("sv_allowcslua", "0");
+	-- Con Settings
+	RunConsoleCommand("ai_disabled", "0")
+	RunConsoleCommand("ai_ignoreplayers", "0")
+	RunConsoleCommand("ai_serverragdolls", "0")
+	RunConsoleCommand("npc_citizen_auto_player_squad", "0")
 	
-	MsgC( Color( 100, 255, 100 ), "Loading settings successfully completed\n" )
+	RunConsoleCommand("sbox_noclip", "0")
+	RunConsoleCommand("sbox_godmode", "0")
+	RunConsoleCommand("sv_kickerrornum", "0")
+
+	RunConsoleCommand("sk_antlion_health", "40")
+	RunConsoleCommand("sk_antlion_swipe_damage", "15")
+	RunConsoleCommand("sk_antlion_jump_damage", "10")
+
+	RunConsoleCommand("sv_allowcslua", "0")
+	RunConsoleCommand("r_shadows", "0")
+	
+	MsgC(Color(100, 255, 100), "# Loading game settings successfully completed!\n")
+	
+	-- Auto Load Map config
+	local LoadMap = GAMEMODE.FolderName .. "/gamemode/maps/" .. game.GetMap() .. ".lua"
+	if file.Exists( LoadMap, "LUA" ) then
+		MsgC(Color(100, 255, 100), "# Loading config for: "..game.GetMap().."... \n")
+		include( LoadMap )
+	else
+		MsgC(Color(255, 100, 100), "* THIS MAP IS NOT SUPPORTED *\n")
+		MsgC(Color(255, 50, 50), "The current map is unsupported!\n")
+	end
 end)

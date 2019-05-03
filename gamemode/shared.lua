@@ -2,14 +2,14 @@ GM.Name = "Starship Troopers"
 GM.Author = "-=JokerR |CMBG|=-"
 GM.Email = "N/A"
 GM.Website = "http://steamcommunity.com/sharedfiles/filedetails/?id=197393073"
-GM.Version = "BETA 0.7.8"
+GM.Version = "BETA 0.7.9"
 
 include("player_class/player_engineer.lua")
 include("player_class/player_medic.lua")
 include("player_class/player_soldier.lua")
 include("player_class/player_sniper.lua")
 
---DeriveGamemode("sandbox") -- Dev mode
+DeriveGamemode("sandbox") -- Dev mode
 
 -- Pre Load ConVars
 GM.RoundLimit = CreateConVar("wave_amount", 11, FCVAR_REPLICATED, "Total rounds amount.") -- 12

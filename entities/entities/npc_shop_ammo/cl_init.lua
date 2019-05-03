@@ -46,7 +46,7 @@ usermessage.Hook( 'open_ammo_shop2', function(pl)
 	for k,v in pairs( ST_AmmoList ) do
 	
 	local allowedfor = v["allowedfor"]
-	if table.HasValue(allowedfor, player_manager.GetPlayerClass( LocalPlayer() )) then 
+	if table.HasValue(allowedfor, player_manager.GetPlayerClass( LocalPlayer() )) then
 		local bar = vgui.Create( "DPanel", IconList )
 		bar:SetPos( 0, 0 )  
 		bar:SetSize( 396, 70 ) 
@@ -76,9 +76,6 @@ usermessage.Hook( 'open_ammo_shop2', function(pl)
 				net.WriteString( ammo )
 				net.WriteString( price )
 			net.SendToServer()
-		end
-		function icon.Paint()	
-			draw.RoundedBox( 4, 4, 4, 49, 49, Color(150,150,150,255))	
 		end
 		IconList:AddItem( bar ) 
 		end
@@ -122,9 +119,6 @@ usermessage.Hook( 'open_ammo_shop2', function(pl)
 					net.WriteString( wep )
 					net.WriteString( price )
 				net.SendToServer()
-			end
-			function icon.Paint()	
-				draw.RoundedBox( 4, 4, 4, 49, 49, Color(150,150,150,255))	
 			end
 			IconList2:AddItem( bar ) 
 		end

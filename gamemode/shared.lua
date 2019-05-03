@@ -4,7 +4,12 @@ GM.Email = "N/A"
 GM.Website = "http://steamcommunity.com/sharedfiles/filedetails/?id=197393073"
 GM.Version = "BETA 0.7.8"
 
-DeriveGamemode("sandbox") -- Dev mode
+include("player_class/player_engineer.lua")
+include("player_class/player_medic.lua")
+include("player_class/player_soldier.lua")
+include("player_class/player_sniper.lua")
+
+--DeriveGamemode("sandbox") -- Dev mode
 
 -- Pre Load ConVars
 GM.RoundLimit = CreateConVar("wave_amount", 11, FCVAR_REPLICATED, "Total rounds amount.") -- 12
@@ -36,16 +41,6 @@ net.Receive("OpenHelpMenu", function()
 	GAMEMODE.HelpMenu = vgui.Create("DHelpMenu")
 end)
 
-function GM:PlayerInitialSpawn( pl )
-	pl:SetTeam(TEAM_SPECTATOR)
-	pl:Money_Create()
-	
-	PrintMessage(HUD_PRINTTALK, pl:GetName() .. " has arrived.")
-	
-	self:ShowTeam(pl)
-	pl:ChatPrint("Welcome to Starship Troopers: Do you want to live for ever or what?!")
-end
-
 function GM:PlayerSpawn( pl )
 	pl:SetCanZoom(false)
 	pl:Flashlight(false)
@@ -67,7 +62,6 @@ function GM:PlayerSpawn( pl )
 end
 
 function GM:ContextMenuOpen()
-	--print( "123" )
 end
 
 function GM:PlayerNoClip( pl )

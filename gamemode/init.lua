@@ -33,11 +33,6 @@ include("sv_round.lua")
 include("sh_round.lua")
 include("sh_gamestate.lua")
 
-include("player_class/player_engineer.lua")
-include("player_class/player_medic.lua")
-include("player_class/player_soldier.lua")
-include("player_class/player_sniper.lua")
-
 util.AddNetworkString( "TeamSelect" )
 util.AddNetworkString( "OpenTeamSelect" )
 util.AddNetworkString( "OpenHelpMenu" )
@@ -48,17 +43,18 @@ local RegenLast = 0
 local RegenDelay = 0.06
 local pm = FindMetaTable("Player")
 
---[[
-function GM:Initialize()
-	if file.Exists("gamemodes/" .. string.lower( GAMEMODE.Name ) .. "/gamemode/maps/" .. string.lower( game.GetMap() ) .. ".lua", "GAME") then
-		include("../gamemodes/" .. string.lower( GAMEMODE.Name ) .. "/gamemode/maps/" .. string.lower( game.GetMap() ) .. ".lua")
-	end
-	print("Loading maps successfully completed")
-end
-]]
-
 function GM:GetGameDescription() 
  	return self.Name 
+end
+
+function GM:PlayerInitialSpawn( pl )
+	pl:SetTeam(TEAM_SPECTATOR)
+	pl:Money_Create()
+	
+	PrintMessage(HUD_PRINTTALK, pl:GetName() .. " has arrived.")
+	
+	self:ShowTeam(pl)
+	pl:ChatPrint("Welcome to Starship Troopers: Do you want to live for ever or what?!")
 end
 
 local DomNextThink = 0
@@ -101,21 +97,35 @@ function GM:PlayerShouldTakeDamage(ply, attacker)
 	return true
 end
 
-function NPCKilled(npc, pl)
-	if pl:IsPlayer() then
-		if table.HasValue(ST_BugsNPC, npc:GetClass()) then
-			pl:Money_Add(2)
-			pl:AddFrags(2)
-		elseif table.HasValue(ST_BossNPC, npc:GetClass()) then
-			pl:Money_Add(15)
-			pl:AddFrags(15)
+local ST_BugsNPC = {
+	["npc_antlion"]=true,
+	["npc_antlion_worker"]=true
+}
+local ST_BossNPC = {
+	["npc_antlionguard"]=true,
+	["bug_tanker"]=true
+}
+
+function NPCKilled(npc, attacker)
+	if attacker:IsPlayer() then
+		if ST_BugsNPC[npc:GetClass()] then
+			attacker:Money_Add(2)
+			attacker:AddFrags(2)
+		elseif ST_BossNPC[npc:GetClass()] then
+			attacker:Money_Add(60)
+			attacker:AddFrags(60)
 		end
 	end
 end
 hook.Add("OnNPCKilled", "OnNPCKilled", NPCKilled)
 
+local ST_FriendNPC = {
+	["npc_barney"]=true,
+	["npc_citizen"]=true
+}
+
 function GM:EntityTakeDamage(target, dmginfo)
-	if (target:IsNPC() and table.HasValue(ST_FriendNPC, target:GetClass())) then
+	if target:IsNPC() and ST_FriendNPC[target:GetClass()] then
 		local pl = dmginfo:GetAttacker()
 		if pl:IsPlayer() then
 			dmginfo:SetDamage(0)
@@ -127,7 +137,7 @@ function GM:PlayerDeath( pl )
 	pl.NextSpawnTime = CurTime() + 2
 end
 
-function PlayerDropWeapon(pl, attacker) -- Drop wep
+function PlayerDropWeapon(pl, attacker)
 	if (pl:GetActiveWeapon():IsValid()) then
 
 	local drop = ents.Create("item_droppedweapon")
@@ -158,7 +168,7 @@ function GM:PlayerDeathThink( pl )
 end
 
 function GM:GetFallDamage( pl, speed )
-	return math.max(0, math.ceil(0.2418*speed - 141.75)) -- https://facepunch.com/showthread.php?t=1499567&p=49491153&viewfull=1#post49491153
+	return math.max(0, math.ceil(0.2418*speed - 141.75))
 end
 
 function GM:PlayerUse( pl )
@@ -172,8 +182,8 @@ function GM:CanPlayerSuicide( pl )
 end
 
 function GM:PlayerDisconnected( pl )
-	 PrintMessage( HUD_PRINTTALK, "Player "..pl:Name().. " left the game." )
-	 for _,v in pairs(ents.FindByClass("obj_*")) do
+	PrintMessage( HUD_PRINTTALK, "Player "..pl:Name().. " left the game." )
+	for _,v in pairs(ents.FindByClass("obj_*")) do
 		if v:GetBuilder() == pl then
 			v:Remove()
 		end
@@ -231,12 +241,9 @@ net.Receive("TeamSelect", function(length, pl)
 	end
 end)
 
------------------------------------------------------------------
-function pm:Money_Create() -- DONT TOUCH! THIS FUNCTION SAVES THE SHIT
-	if self:SetPData( "cash" ) == nil then -- if there is no data under "cash", create some!
-		self:SetPData( "cash", 0 ) -- if there is no "cash" data, give them 15 cash to begin with!
-		self:SetPData( "heat", 0 ) -- if there is no "cash" data, give them 15 cash to begin with!
-	end
+function pm:Money_Create()
+	self:SetPData( "cash", 0 ) 
+	self:SetPData( "heat", 0 )
 end
 
 function pm:Money_Set( cash )

@@ -3,13 +3,6 @@
 //							  01/08/2015					 		 //
 ///////////////////////////////////////////////////////////////////////
 
-ST_FriendNPC = {"npc_barney", "npc_citizen"}
-
-ST_BugsNPC = {"npc_antlion", "npc_antlion_worker"}
-
-ST_BossNPC = {"npc_antlionguard", "bug_tanker"}
-
----------------------------------------------
 ST_AmmoList = {
 	["SMG_G"] = {
 		["label"] = "Grenade Round",

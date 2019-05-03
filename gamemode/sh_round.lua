@@ -22,7 +22,7 @@ else
 		--surface.PlaySound("music/HL2_song15.mp3")
 		--surface.PlaySound("music/stingers/HL1_stinger_song8.mp3")
 		--hook.Call("OnRoundEnd")
-		print("SOUND HERE!!!")
+		--print("SOUND HERE!!!")
 	end
 	net.Receive("WaveResult", GM.ReceiveRoundResult)
 

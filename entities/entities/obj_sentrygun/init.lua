@@ -82,32 +82,14 @@ local function targetpos_default(t)
 	return t:BodyTarget(t:GetPos())
 end
 
---[[ from HL2 bone
-local function targetpos_hl2(t)
-	local bone = t:LookupBone("ValveBiped.Bip01_Spine2")
-	if bone then return t:GetBonePosition(bone) end
-end
-]]
 -- from bounding box
 local function targetpos_bb(t)
 	return t:LocalToWorld(t:OBBCenter())
 end
 
---local targetmethods = {targetpos_default, targetpos_hl2, targetpos_bb}
 local targetmethods = {targetpos_default, targetpos_bb}
-local targetmethodnames = {
-	"bodytarget",
-	--"hl2 spine",
-	"bounding box",
-}
-local CURRENT_SELF
 
-local enemylist = {
-	"npc_antlion", 
-	"npc_antlion_worker", 
-	"npc_antlionguard", 
-	"bug_tanker"
-}
+local CURRENT_SELF
 
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)
@@ -122,29 +104,21 @@ end
 function ENT:GetTargetMethod(ent, strict)
 	local startpos = self:TargetOrigin()
 
-	--print(tostring(ent)) 
 	for i, method in ipairs(targetmethods) do
-
-		--print(targetmethodnames[i]) 
-
 		local pos = method(ent)
 		if pos then
 			CURRENT_SELF = self
 			local tr = util.TraceLine({
 				start=startpos, 
 				endpos=pos, 
-				filter=self--,
-				--filter = function( ent ) if table.HasValue(enemylist, ent:GetClass()) and self then return true end end
+				filter=self
 			})
 			CURRENT_SELF = nil
 			if tr.Entity == ent or (not strict and tr.StartSolid) then
-				--print("OK!\n") 
 				return method
-			else
-				--print("Failure! (entity hit: %s)\n", tostring(tr.Entity)) 
+			--else
 			end
-		else
-			--print("Failure! (no position found)\n") 
+		--else
 		end
 	end
 end
@@ -321,13 +295,18 @@ function ENT:ShootBullets()
 	return true
 end
 
+local enemylist = {
+	["npc_antlion"]=true,
+	["npc_antlion_worker"]=true,
+	["npc_antlionguard"]=true,
+	["bug_tanker"]=true
+}
+
 function ENT:FindTarget()
 	local Target, MinDist, Method
 	for _, v in pairs(ents.FindInSphere(self:GetPos(), self.Range)) do
-		if v:IsNPC() and v:Health() > 0 and table.HasValue(enemylist, v:GetClass()) then
-			local d = self:GetPos():Distance(v:GetPos()) -- Distance
-			--local dr = self:GetPos():DistToSqr(v:GetPos())
-			--print("Dist: "..d, "  ToSqr: "..dr)
+		if v:IsNPC() and v:Health() > 0 and enemylist[v:GetClass()] then
+			local d = self:GetPos():Distance(v:GetPos())
 			if not MinDist or d<MinDist then
 				local method = self:GetTargetMethod(v, true)
 				if method then
@@ -338,7 +317,6 @@ function ENT:FindTarget()
 			end
 		end
 	end
-	--print(Target, MinDist, Method)
 	
 	return Target, Method
 end

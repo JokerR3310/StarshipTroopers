@@ -25,16 +25,22 @@ game.AddParticles( "particles/sparks.pcf" )
 
 surface.CreateFont( "st_timer_text", { font = "Roboto", size = 23, weight = 600, antialias = true } )
 
-GM.HUDToHide = {
-	"CHudHealth",
-	"CHudBattery",
-	"CHudAmmo",
-	"CHudSecondaryAmmo"
+function GM:Initialize()
+	RunConsoleCommand("gmod_mcore_test", "1")
+	RunConsoleCommand("mat_queue_mode", "2")
+	RunConsoleCommand("cl_threaded_bone_setup", "1")
+end
+
+local HUDToHide = {
+	["CHudHealth"]=true,
+	["CHudBattery"]=true,
+	["CHudAmmo"]=true,
+	["CHudSecondaryAmmo"]=true
 }
 
-function GM:HUDShouldDraw( name )
-	if table.HasValue(self.HUDToHide, name) then return false end
-		return true
+function GM:HUDShouldDraw(name)
+	if HUDToHide[name] then return false end
+	return true
 end
 
 function GM:OnRoundStart( num ) -- Unused hook run on round start where num is the round number.

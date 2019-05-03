@@ -2,7 +2,7 @@
 ///--------------- Hud Code --------------
 //--------------------------------------
 
-local interactivetips = CreateConVar("cl_intips", "1", {FCVAR_ARCHIVE}, "Enable/Disable Interactive tips.")
+local interactivetips = CreateConVar("cl_intips", "0", {FCVAR_ARCHIVE}, "Enable/Disable Interactive tips.")
 
 local middle = ScrW()/2
 

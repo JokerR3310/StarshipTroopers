@@ -33,7 +33,12 @@ SWEP.HitWorld = Sound("Weapon_Wrench.HitWorld")
 SWEP.HitBuildingSuccess = Sound("Weapon_Wrench.HitBuilding_Success")
 SWEP.HitBuildingFailure = Sound("Weapon_Wrench.HitBuilding_Failure")
 
-SWEP.Npclist = {"npc_antlion", "npc_antlion_worker", "npc_antlionguard", "bug_tanker"}
+local Npclist = {
+	["npc_antlion"]=true,
+	["npc_antlion_worker"]=true,
+	["npc_antlionguard"]=true,
+	["bug_tanker"]=true
+}
 
 function SWEP:Holster()
 	return true
@@ -80,7 +85,7 @@ function SWEP:PrimaryAttack(tr)
 		else
 			self.Owner:EmitSound(self.HitFlesh)
 			if !ent:IsPlayer() then
-				if ent:IsNPC() and (table.HasValue(self.Npclist, ent:GetClass())) then
+				if ent:IsNPC() and Npclist[ent:GetClass()] then
 					ent:TakeDamageInfo(dmginfo)
 				end
 			end

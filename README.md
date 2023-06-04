@@ -1,6 +1,6 @@
-# Starship Troopers Gamemode - BETA 0.7.9
+# Starship Troopers Gamemode - BETA 0.8.1
 
-Steam Workshop link, ver. 0.7.9
+Steam Workshop link, ver. 0.8.1
 
 http://steamcommunity.com/sharedfiles/filedetails/?id=197393073
 

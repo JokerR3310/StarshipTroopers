@@ -62,7 +62,11 @@ function GM:OnRoundStart(round)
 end
 
 function GM:OnRoundFail()
-	for _, v in pairs(player.GetAll()) do v:SetTeam( TEAM_SPECTATOR ) v:Money_Create() end
+	for _, v in pairs(player.GetAll()) do
+		v:SetTeam( TEAM_SPECTATOR ) 
+		v:SetNetVar("Credits", 0) 
+		v:SetNetVar("Heat", 0)
+	end
 
 	timer.Simple(1, function()
 		game.CleanUpMap()
@@ -70,7 +74,7 @@ function GM:OnRoundFail()
 	
 	self:SetGameState(STATE_WAITING_FOR_PLAYERS)
 	
-	self:SetRound(0)
+	self:SetRound(1)
 	
 	timer.Remove("WaveEndTimer")
 	timer.Remove("UpdateWaveTime")
@@ -87,6 +91,6 @@ function GM:OnRoundFail()
 	if file.Exists( LoadMap, "LUA" ) then
 		include( LoadMap )
 	end
-		
-	PrintMessage(HUD_PRINTTALK, 'Wave failed and map was restarted.')
+
+	PrintMessage(HUD_PRINTTALK, 'Wave failed and map was restarted')
 end

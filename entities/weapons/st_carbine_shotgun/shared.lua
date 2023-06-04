@@ -7,7 +7,7 @@ SWEP.WorldModel			= "models/ryan7259/starshiptroopers/weapons/w_moritamk2_pumpsh
 SWEP.Spawnable			= true
 SWEP.AdminOnly			= true
 
-SWEP.Primary.Sound 			= Sound("sfx_mk2_1st_person_tail.wav")	// Sound of the gun
+SWEP.Primary.Sound 			= Sound("sfx_mk4_fire.wav")	// Sound of the gun
 SWEP.Primary.RPM			= 690							// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 160							// Size of a clip
 SWEP.Primary.DefaultClip	= 460							// Default number of bullets in a clip

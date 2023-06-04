@@ -7,9 +7,26 @@ function PANEL:Init()
 	self:ShowCloseButton(false)
 	self:SetDraggable(false)
 	self:MakePopup()
+	
+	local SoldiersModels = {
+		"models/mobileinfantry/fmi_01.mdl",
+		"models/mobileinfantry/fmi_02.mdl",
+		"models/mobileinfantry/fmi_03.mdl",
+		"models/mobileinfantry/fmi_04.mdl",
+		"models/mobileinfantry/fmi_06.mdl",
+		"models/mobileinfantry/fmi_07.mdl",
+		"models/mobileinfantry/mi_02.mdl",
+		"models/mobileinfantry/mi_03.mdl",
+		"models/mobileinfantry/mi_04.mdl",
+		"models/mobileinfantry/mi_05.mdl",
+		"models/mobileinfantry/mi_06.mdl",
+		"models/mobileinfantry/mi_07.mdl",
+		"models/mobileinfantry/mi_08.mdl",
+		"models/mobileinfantry/mi_09.mdl"
+	}
 
 	self.icon = vgui.Create( "DModelPanel", self )
-	self.icon:SetModel( 'models/player/deltaforce/m0'..math.random(1, 8)..'.mdl' )
+	self.icon:SetModel( SoldiersModels[math.random(#SoldiersModels)] )
 	self.icon:SetSize( 256, 256 )
 	self.icon:SetPos( -35, -10 )
 
@@ -25,7 +42,7 @@ function PANEL:Init()
 	end
 
 	self.icon2 = vgui.Create( "DModelPanel", self )
-	self.icon2:SetModel( 'models/player/combine_soldier_prisonguard.mdl' )
+	self.icon2:SetModel( 'models/player/deltaforce/m0'..math.random(1, 8)..'.mdl' )
 	self.icon2:SetSize( 256, 256 )
 	self.icon2:SetPos( 100, -10 )
 
@@ -40,8 +57,25 @@ function PANEL:Init()
 		self:Close()
 	end
 
+	local MedicModels = {
+		"models/mobileinfantry/fmi_m_01.mdl",
+		"models/mobileinfantry/fmi_m_02.mdl",
+		"models/mobileinfantry/fmi_m_03.mdl",
+		"models/mobileinfantry/fmi_m_04.mdl",
+		"models/mobileinfantry/fmi_m_06.mdl",
+		"models/mobileinfantry/fmi_m_07.mdl",
+		"models/mobileinfantry/mi_m_02.mdl",
+		"models/mobileinfantry/mi_m_03.mdl",
+		"models/mobileinfantry/mi_m_04.mdl",
+		"models/mobileinfantry/mi_m_05.mdl",
+		"models/mobileinfantry/mi_m_06.mdl",
+		"models/mobileinfantry/mi_m_07.mdl",
+		"models/mobileinfantry/mi_m_08.mdl",
+		"models/mobileinfantry/mi_m_09.mdl"
+	}
+
 	self.icon3 = vgui.Create( "DModelPanel", self )
-	self.icon3:SetModel( 'models/player/group03m/male_0'..math.random(1, 9)..'.mdl' )
+	self.icon3:SetModel( MedicModels[math.random(#MedicModels)] )
 	self.icon3:SetSize( 256, 256 )
 	self.icon3:SetPos( 240, -10 )
 

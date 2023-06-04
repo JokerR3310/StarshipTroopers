@@ -14,7 +14,7 @@ function PLAYER:Spawn()
 end
 
 function PLAYER:SetModel()
-	self.Player:SetModel('models/player/combine_soldier_prisonguard.mdl')
+	self.Player:SetModel('models/player/deltaforce/m0'..math.random(1, 8)..'.mdl')
 end
 
 function PLAYER:Loadout()

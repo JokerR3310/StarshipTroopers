@@ -89,7 +89,7 @@ end
 
 local targetmethods = {targetpos_default, targetpos_bb}
 
-local CURRENT_SELF
+--local CURRENT_SELF
 
 function ENT:Initialize()
 	self.BaseClass.Initialize(self)
@@ -107,13 +107,13 @@ function ENT:GetTargetMethod(ent, strict)
 	for i, method in ipairs(targetmethods) do
 		local pos = method(ent)
 		if pos then
-			CURRENT_SELF = self
+			--CURRENT_SELF = self
 			local tr = util.TraceLine({
 				start=startpos, 
 				endpos=pos, 
 				filter=self
 			})
-			CURRENT_SELF = nil
+			--CURRENT_SELF = nil
 			if tr.Entity == ent or (not strict and tr.StartSolid) then
 				return method
 			--else
@@ -303,58 +303,63 @@ local enemylist = {
 }
 
 function ENT:FindTarget()
-	local Target, MinDist, Method
-	for _, v in pairs(ents.FindInSphere(self:GetPos(), self.Range)) do
-		if v:IsNPC() and v:Health() > 0 and enemylist[v:GetClass()] then
-			local d = self:GetPos():Distance(v:GetPos())
-			if not MinDist or d<MinDist then
-				local method = self:GetTargetMethod(v, true)
-				if method then
-					Target = v
-					MinDist = d
-					Method = method
-				end
-			end
-		end
-	end
-	
-	return Target, Method
+    local Target, MinDist, Method
+
+    for _, v in pairs(ents.FindInSphere(self:GetPos(), self.Range)) do
+        if enemylist[v:GetClass()] and v:Health() > 0 then
+            local d = self:GetPos():Distance(v:GetPos())
+
+            if not MinDist or d < MinDist then
+                local method = self:GetTargetMethod(v, true)
+
+                if method then
+                    Target = v
+                    MinDist = d
+                    Method = method
+                end
+            end
+        end
+    end
+
+    return Target, Method
 end
 
 function ENT:ThinkIdle()
-	local dp, dy = sign(self.TargetPitch-self.TurretPitch), sign(self.TargetYaw-self.TurretYaw)
-		
-	self.TurretPitch = angnorm(self.TurretPitch + dp*self.IdlePitchSpeed)
-	if dp * self.TurretPitch >= dp * self.TargetPitch then
-		self.TurretPitch = self.TargetPitch
-	end
-		
-	self.TurretYaw = angnorm(self.TurretYaw + dy*self.IdleYawSpeed)
-	if dy * self.TurretYaw >= dy * self.TargetYaw then
-		self.TargetYaw = -self.TargetYaw
-		self.Idle_Sound:Stop()
-		
-		self.Idle_Sound:PlayEx(1, self.SoundPitch)
-		
-		self.TargetPitch = 5 * math.random(-2, 2)
-	end
-	
-	self.VisualTurretPitch = self.TurretPitch
-	
-	if not self.NextSearch or CurTime()>=self.NextSearch then
-		self.Target, self.TargetMethod = self:FindTarget()
-		if self.Target and self.TargetMethod and self.Target:IsValid() then
-			if self.AlertSoundEnt then
-				self.AlertSoundEnt:Stop()
-			end
-			self.AlertSoundEnt = CreateSound(self, self.Sound_Alert)
-			self.AlertSoundEnt:PlayEx(1, self.SoundPitch)
+    local dp, dy = sign(self.TargetPitch - self.TurretPitch), sign(self.TargetYaw - self.TurretYaw)
+    self.TurretPitch = angnorm(self.TurretPitch + dp * self.IdlePitchSpeed)
 
-			self:SetSentryState(2)
-			return
-		end
-		self.NextSearch = CurTime() + 0.5
-	end
+    if dp * self.TurretPitch >= dp * self.TargetPitch then
+        self.TurretPitch = self.TargetPitch
+    end
+
+    self.TurretYaw = angnorm(self.TurretYaw + dy * self.IdleYawSpeed)
+
+    if dy * self.TurretYaw >= dy * self.TargetYaw then
+        self.TargetYaw = -self.TargetYaw
+        self.Idle_Sound:Stop()
+        self.Idle_Sound:PlayEx(1, self.SoundPitch)
+        self.TargetPitch = 5 * math.random(-2, 2)
+    end
+
+    self.VisualTurretPitch = self.TurretPitch
+
+    if not self.NextSearch or CurTime() >= self.NextSearch then
+        self.Target, self.TargetMethod = self:FindTarget()
+
+        if self.Target and self.TargetMethod and self.Target:IsValid() then
+            if self.AlertSoundEnt then
+                self.AlertSoundEnt:Stop()
+            end
+
+            self.AlertSoundEnt = CreateSound(self, self.Sound_Alert)
+            self.AlertSoundEnt:PlayEx(1, self.SoundPitch)
+            self:SetSentryState(2)
+
+            return
+        end
+
+        self.NextSearch = CurTime() + 0.5
+    end
 end
 
 function ENT:ThinkTarget()

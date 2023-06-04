@@ -105,7 +105,7 @@ function PANEL:Init()
 
  •  Author:  -=JokerR |CMBG|=-
 
- •  Version: "Open Beta 0.7.8" | 19/12/2015
+ •  Version: "Open Beta 0.8.1" | 03/06/2023
 ]])
 		self.Info:SetTextColor(Color(0, 0, 0, 255))
 		self.Info:SetPos(5, 20)

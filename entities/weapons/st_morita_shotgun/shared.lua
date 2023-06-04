@@ -15,12 +15,12 @@ SWEP.Primary.RPM			= 110					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 20					// Size of a clip
 SWEP.Primary.DefaultClip	= 114				// Default number of bullets in a clip 114
 SWEP.Primary.Ammo			= "Buckshot"	
-SWEP.Primary.DamageMax 		= 8
-SWEP.Primary.DamageMin		= 2
+SWEP.Primary.DamageMax 		= 10
+SWEP.Primary.DamageMin		= 6
 SWEP.Primary.RangeMax		= 40
 SWEP.Primary.RangeMin		= 600
 
-function SWEP:FireRocketPrim()
+function SWEP:FireShotPrim()
 	local bullet = {}
     bullet.Num       	= 6
     bullet.Src       	= self.Owner:GetShootPos()           // Source

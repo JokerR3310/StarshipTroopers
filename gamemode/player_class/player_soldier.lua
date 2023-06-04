@@ -13,8 +13,25 @@ PLAYER.TeammateNoCollide	= false
 function PLAYER:Spawn()
 end
 
+local SoldiersModels = {
+    "models/mobileinfantry/fmi_01.mdl",
+    "models/mobileinfantry/fmi_02.mdl",
+    "models/mobileinfantry/fmi_03.mdl",
+    "models/mobileinfantry/fmi_04.mdl",
+    "models/mobileinfantry/fmi_06.mdl",
+    "models/mobileinfantry/fmi_07.mdl",
+    "models/mobileinfantry/mi_02.mdl",
+    "models/mobileinfantry/mi_03.mdl",
+    "models/mobileinfantry/mi_04.mdl",
+    "models/mobileinfantry/mi_05.mdl",
+    "models/mobileinfantry/mi_06.mdl",
+    "models/mobileinfantry/mi_07.mdl",
+    "models/mobileinfantry/mi_08.mdl",
+    "models/mobileinfantry/mi_09.mdl"
+}
+
 function PLAYER:SetModel()
-	self.Player:SetModel('models/player/deltaforce/m0'..math.random(1, 8)..'.mdl')
+	self.Player:SetModel(SoldiersModels[math.random(#SoldiersModels)])
 end
 
 function PLAYER:Loadout()

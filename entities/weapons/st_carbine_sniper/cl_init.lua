@@ -29,13 +29,16 @@ function SWEP:Initialize()
 	self.LensTable.h = 2*self.ScopeTable.l	
 end
 
+local elcansight = surface.GetTextureID("scope/gdcw_elcansight")
+local svdsight = surface.GetTextureID("scope/gdcw_svdsight")
+
 function SWEP:DrawHUD()
 	if self.Owner:KeyDown(IN_ATTACK2) and not self.Weapon:GetNWBool("Reloading") then
-		
-		surface.SetTexture(surface.GetTextureID("scope/gdcw_elcansight"))
+		render.OverrideBlend( false )
+		surface.SetTexture(elcansight)
 		surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
 		
-		surface.SetTexture(surface.GetTextureID("scope/gdcw_svdsight"))
+		surface.SetTexture(svdsight)
 		surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
 	else
 		self.BaseClass.DrawHUD(self)

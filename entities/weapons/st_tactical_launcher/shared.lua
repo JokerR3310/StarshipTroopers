@@ -56,9 +56,38 @@ function SWEP:FireRocket()
 	end
 end
 
+local female_snd = {
+	"vo/npc/female01/coverwhilereload01.wav",
+	"vo/npc/female01/coverwhilereload02.wav",
+	"vo/npc/female01/gottareload01.wav",
+	"vo/npc/female01/gottareload01.wav",
+	"vo/npc/female01/gottareload01.wav",
+	"vo/npc/female01/gottareload01.wav"
+}
+
+local male_snd = {
+	"vo/npc/male01/coverwhilereload01.wav",
+	"vo/npc/male01/coverwhilereload02.wav",
+	"vo/npc/male01/gottareload01.wav",
+	"vo/npc/male01/gottareload01.wav",
+	"vo/npc/male01/gottareload01.wav",
+	"vo/npc/male01/gottareload01.wav"
+}
+
 function SWEP:Reload()
 	if self.Weapon:DefaultReload(ACT_VM_RELOAD) then
 		self.Weapon:EmitSound(Sound("sfx_rocket_reload.wav"))
-		self.Weapon:EmitSound(Sound("vo/npc/male01/coverwhilereload0"..math.random(1,2)..".wav"))
+
+		if SERVER and math.random(10) > 2 and not self:GetOwner():GetNetVar("Taunt", false) then
+			local getgender = string.find(string.lower(self:GetOwner():GetModel()), "mobileinfantry/fmi")
+		
+			if getgender then
+				self:GetOwner():EmitSound(Sound(female_snd[math.random(#female_snd)]))
+			else
+				self:GetOwner():EmitSound(Sound(male_snd[math.random(#male_snd)]))
+			end
+			
+			self:GetOwner():SetNetVar("Taunt", true)
+		end
 	end
 end

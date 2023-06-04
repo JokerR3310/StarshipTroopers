@@ -1,23 +1,29 @@
 GM.Name = "Starship Troopers"
 GM.Author = "-=JokerR |CMBG|=-"
-GM.Email = "N/A"
-GM.Website = "http://steamcommunity.com/sharedfiles/filedetails/?id=197393073"
-GM.Version = "BETA 0.7.9"
+GM.Version = "BETA 0.8.1"
+
+DeriveGamemode("sandbox") -- Dev mode
 
 include("player_class/player_engineer.lua")
 include("player_class/player_medic.lua")
 include("player_class/player_soldier.lua")
 include("player_class/player_sniper.lua")
 
-DeriveGamemode("sandbox") -- Dev mode
-
 -- Pre Load ConVars
-GM.RoundLimit = CreateConVar("wave_amount", 11, FCVAR_REPLICATED, "Total rounds amount.") -- 12
-GM.RoundLength = CreateConVar("wave_length", 120, FCVAR_REPLICATED, "Round length in seconds.") -- 120
-GM.RoundPostEndTime = CreateConVar("wave_post_end", 62, FCVAR_REPLICATED, "Seconds between round end and round start.") -- 62
+GM.RoundLimit = GetConVar("wave_amount") 
+GM.RoundLength = GetConVar("wave_length")
+GM.RoundPostEndTime = GetConVar("wave_post_end")
 
 team.SetUp(1, "Player", Color(0, 0, 255))
 team.SetUp(2, "Engi", Color(0, 0, 255))
+
+function GM:GetGameDescription() 
+ 	return "Starship Troopers - Outpost Defence Simulator 2015"
+end
+
+function GM:Initialize()
+	hook.Remove("PlayerTick", "TickWidgets")
+end
 
 function GM:ShowHelp( pl )
 	net.Start("OpenHelpMenu")
@@ -43,15 +49,13 @@ end)
 
 function GM:PlayerSpawn( pl )
 	pl:SetCanZoom(false)
-	pl:Flashlight(false)
-	pl:AllowFlashlight(false)
-	
+
 	if pl:Team() == TEAM_SPECTATOR then
 		pl:SetNoTarget(true)
 		GAMEMODE:PlayerSpawnAsSpectator( pl )
 		return
 	end
-	
+
 	pl:SetNoTarget(false)
 	
 	pl:UnSpectate()	
@@ -62,14 +66,10 @@ function GM:PlayerSpawn( pl )
 end
 
 function GM:ContextMenuOpen()
+	return false
 end
 
 function GM:PlayerNoClip( pl )
 	if pl:Team() == TEAM_SPECTATOR then return false end
 	return GetConVar( "sbox_noclip" ):GetBool()
-end
-
-function GM:GmodLoadScript()
-	if engine.ActiveGamemode() == self.FolderName then return false end
-	return true
 end

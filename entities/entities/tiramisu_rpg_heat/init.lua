@@ -45,7 +45,7 @@ function ENT:Think()
 	end
 	
 	if tr.Hit then
-		util.BlastDamage(self, self:GetOwner(), tr.HitPos, 600, 150)
+		util.BlastDamage(self, self:GetOwner(), tr.HitPos, 800, 150)
 			local effectdata = EffectData()
 				effectdata:SetOrigin(tr.HitPos)			// Where is hits
 				effectdata:SetNormal(tr.HitNormal)		// Direction of particles

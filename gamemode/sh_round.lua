@@ -1,4 +1,4 @@
-GM.Round = 0
+GM.Round = 1
 
 function GM:GetRound()
 	return self.Round

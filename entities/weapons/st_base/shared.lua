@@ -10,8 +10,8 @@ SWEP.WorldModel			= "models/ryan7259/starshiptroopers/weapons/w_moritamk2_pumpsh
 SWEP.Spawnable			= false
 SWEP.AdminOnly			= false
 
-SWEP.Primary.Sound 			= Sound("sfx_mk2_1st_person_tail.wav")	// Sound of the gun
-SWEP.Primary.RPM			= 0										// This is in Rounds Per Minute
+SWEP.Primary.Sound 			= Sound("sfx_mk4_fire.wav")	// Sound of the gun
+SWEP.Primary.RPM			= 690										// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 0										// Size of a clip
 SWEP.Primary.DefaultClip	= 0										// Default number of bullets in a clip
 SWEP.Primary.Automatic		= true									// Automatic/Semi Auto
@@ -30,9 +30,31 @@ function SWEP:Initialize()
 	self:SetHoldType( self.HoldType )
 end
 
+function SWEP:GetNPCRestTimes()
+	-- Handles the time between bursts
+	-- Min rest time in seconds, max rest time in seconds
+
+	return 0.3, 0.6
+end
+
+function SWEP:GetNPCBurstSettings()
+	-- Handles the burst settings
+	-- Minimum amount of shots, maximum amount of shots, and the delay between each shot
+	-- The amount of shots can end up lower than specificed
+
+	return 1, 20, 0.04
+end
+
+function SWEP:GetNPCBulletSpread( proficiency )
+	-- Handles the bullet spread based on the given proficiency
+	-- return value is in degrees
+
+	return 1
+end
+
 function SWEP:Deploy()
-	self:SetHoldType( self.HoldType )
-	self.Weapon:SendWeaponAnim( ACT_VM_DRAW )
+	self:SendWeaponAnim( ACT_VM_DRAW )
+
 	return true
 end
 
@@ -84,7 +106,7 @@ function SWEP:ThrowGrenade()
 end
 
 function SWEP:PrimaryAttack()
-	if self.Owner:GetAmmoCount( "Grenade" ) > 0 then
+	if !self.Owner:IsNPC() and self.Owner:GetAmmoCount( "Grenade" ) > 0 then
 		if self.Owner:IsPlayer() and self.Owner:KeyDown(IN_USE) then
 			self:ThrowGrenade()
 			return 
@@ -98,14 +120,18 @@ function SWEP:PrimaryAttack()
 	end
 
 	self:FireShotPrim()
-	self.Weapon:EmitSound(self.Primary.Sound)
+	self.Weapon:EmitSound(self.Primary.Sound, 120)
 	self.Weapon:TakePrimaryAmmo(1)
 	self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 
 	self.Owner:SetAnimation(PLAYER_ATTACK1)
 	self.Owner:MuzzleFlash()
 
-	self.Weapon:SetNextPrimaryFire(CurTime()+1/(self.Primary.RPM/60))
+	if !self.Owner:IsNPC() then
+		self.Owner:ViewPunch(Angle(math.Rand(-1, 1), math.Rand(-1, 1), 0))
+	end
+
+	self:SetNextPrimaryFire(CurTime()+1/(self.Primary.RPM/60))
 	self.Weapon:SetNextSecondaryFire(CurTime()+0.1)
 end
 
@@ -127,14 +153,39 @@ function SWEP:FireShotPrim()
     self.Owner:FireBullets( bullet )
 end
 
-function SWEP:Reload()
-	if self.Weapon:DefaultReload(ACT_VM_RELOAD) then
-		self.Owner:SetFOV( 0, 0.2 )
-		self.Weapon:EmitSound(Sound("sfx_mk2_reload.wav"))
-		local chance = math.random(5)
+local female_snd = {
+	"vo/npc/female01/coverwhilereload01.wav",
+	"vo/npc/female01/coverwhilereload02.wav",
+	"vo/npc/female01/gottareload01.wav",
+	"vo/npc/female01/gottareload01.wav",
+	"vo/npc/female01/gottareload01.wav",
+	"vo/npc/female01/gottareload01.wav"
+}
 
-		if chance < 3 then
-			self.Weapon:EmitSound(Sound("vo/npc/male01/coverwhilereload0"..math.random(1,2)..".wav"))
+local male_snd = {
+	"vo/npc/male01/coverwhilereload01.wav",
+	"vo/npc/male01/coverwhilereload02.wav",
+	"vo/npc/male01/gottareload01.wav",
+	"vo/npc/male01/gottareload01.wav",
+	"vo/npc/male01/gottareload01.wav",
+	"vo/npc/male01/gottareload01.wav"
+}
+
+function SWEP:Reload()
+	if self:DefaultReload(ACT_VM_RELOAD) then
+		self:GetOwner():SetFOV( 0, 0.2 )
+		self:EmitSound(Sound("sfx_mk2_reload.wav"))
+
+		if SERVER and math.random(10) > 2 and not self:GetOwner():GetNetVar("Taunt", false) then
+			local getgender = string.find(string.lower(self:GetOwner():GetModel()), "mobileinfantry/fmi")
+		
+			if getgender then
+				self:GetOwner():EmitSound(Sound(female_snd[math.random(#female_snd)]))
+			else
+				self:GetOwner():EmitSound(Sound(male_snd[math.random(#male_snd)]))
+			end
+			
+			self:GetOwner():SetNetVar("Taunt", true)
 		end
 
 		local oldclass = self.Owner:GetActiveWeapon():GetClass()

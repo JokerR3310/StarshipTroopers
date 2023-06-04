@@ -100,8 +100,8 @@ local PLAYER_LINE =
 			self:Remove()
 			return
 		end
-		if ( self.NumCash == nil || self.NumCash != self.Player:GetNWInt( "cash" ) ) then
-			self.NumCash	=	self.Player:GetNWInt( "cash" )
+		if ( self.NumCash == nil || self.NumCash != tonumber(self.Player:GetNetVar("Credits", 0)) ) then
+			self.NumCash	=	tonumber(self.Player:GetNetVar("Credits", 0))
 			self.Kills:SetText( self.NumCash )
 		end
 
@@ -227,7 +227,7 @@ local SCORE_BOARD =
 
 		draw.SimpleTextOutlined( "Name", "_ScoreboardTopLabel", 120, 84, Color( 228, 228, 228, 255 ), 1, 1, 1, Color( 0, 0, 0, 255 ) )
 		draw.SimpleTextOutlined( "Class", "_ScoreboardTopLabel", 440, 84, Color( 228, 228, 228, 255 ), 1, 1, 1, Color( 0, 0, 0, 255 ) )
-		draw.SimpleTextOutlined( "Points", "_ScoreboardTopLabel", 508, 84, Color( 228, 228, 228, 255 ), 1, 1, 1, Color( 0, 0, 0, 255 ) )
+		draw.SimpleTextOutlined( "Credits", "_ScoreboardTopLabel", 508, 84, Color( 228, 228, 228, 255 ), 1, 1, 1, Color( 0, 0, 0, 255 ) )
 		draw.SimpleTextOutlined( "Deaths", "_ScoreboardTopLabel", 578, 84, Color( 228, 228, 228, 255 ), 1, 1, 1, Color( 0, 0, 0, 255 ) )
 		draw.SimpleTextOutlined( "Ping", "_ScoreboardTopLabel", 640, 84, Color( 228, 228, 228, 255 ), 1, 1, 1, Color( 0, 0, 0, 255 ) )	
 	end,

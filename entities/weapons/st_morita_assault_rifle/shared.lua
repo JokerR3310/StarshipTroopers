@@ -23,24 +23,11 @@ SWEP.Secondary.ClipSize	= 1
 SWEP.Secondary.DefaultClip = 0
 SWEP.Secondary.Ammo = "smg1_grenade"
 
-SWEP.DomNextThink = 0
-SWEP.DomNextTone = 0
-
 function SWEP:Precache()
 	util.PrecacheSound(self.Primary.Sound)
 	util.PrecacheSound(self.Secondary.Sound)
 
 	util.PrecacheSound("sfx_mk4_reload.wav")
-end
-
-function SWEP:Think()
-	if (CurTime() < self.DomNextThink) then return end
-	local heat = self.Owner:GetNWInt("heat")
-	if heat >= 100 then
-		if (CurTime() < self.DomNextTone) then return end
-			self.Weapon:EmitSound("weapons/overheat_tone.wav", 30, 100)
-		self.DomNextTone = CurTime() + 0.2
-	end
 end
 
 function SWEP:DoImpactEffect(tr, nDamageType)
@@ -59,7 +46,8 @@ function SWEP:PrimaryAttack()
 			return 
 		end
 	end
-	local heat = self.Owner:GetNWInt("heat")
+
+	local heat = self.Owner:GetNetVar("Heat", 0)
 
 	if heat < 119 then
 		self:FireShotPrim()
@@ -72,7 +60,7 @@ function SWEP:PrimaryAttack()
 		self.Weapon:SetNextPrimaryFire(CurTime() + 1 / (self.Primary.RPM / 60))
 
 		if SERVER then
-			self.Owner:Set_heat(heat + 4.2)
+			self.Owner:SetNetVar("Heat", heat + 4.2)
 		end
 	end
 end

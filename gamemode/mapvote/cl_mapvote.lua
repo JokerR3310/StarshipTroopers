@@ -101,7 +101,7 @@ function PANEL:Init()
 	--self.stats:SetSize(400, 200)
 	self.stats:SetMultiSelect(false)
 	self.stats:AddColumn("Name") -- Add column
-	self.stats:AddColumn("Amount of points (All time)")
+	self.stats:AddColumn("Amount of credits (All time)")
 	self.stats:AddColumn("Deaths")
 	self.stats:SortByColumn(2)
 	self.stats.Paint = function(s, w, h)

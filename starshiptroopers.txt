@@ -1,9 +1,9 @@
-"Gamemode"
-
+"starshiptroopers"
 {
 	"base"		"base"
 	"title"		"Starship Troopers"
 	"maps"		"^stg_"
+	"category"	"pve"
 	"menusystem"	"1"
 	"workshopid"	"197393073"
 }

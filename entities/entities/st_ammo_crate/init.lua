@@ -41,9 +41,15 @@ function ENT:GiveSomeAmmo(ply)
 	if player_manager.GetPlayerClass( ply ) == "player_engineer" and ply:GetAmmoCount( "AirboatGun" ) < 200 then
 	self:SetSequence(self:LookupSequence("Close"))
 		timer.Simple(1, function()
-			ply:SetAmmo(math.Clamp( ply:GetAmmoCount("AirboatGun") + 10, 0, 200), "AirboatGun")
+			ply:SetAmmo(math.Clamp( ply:GetAmmoCount("AirboatGun") + 15, 0, 200), "AirboatGun")
 			self:SetSequence(self:LookupSequence("idle"))
 			self:EmitSound(self.Sound_Pickup, 100, 100)
 		end)
+	end
+end
+
+function ENT:StartTouch(ent)
+	if IsValid(ent) and ent:IsPlayer() and ent:Alive() then
+		self:AcceptInput(ent, ent)
 	end
 end

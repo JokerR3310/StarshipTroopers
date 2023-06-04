@@ -87,7 +87,6 @@ end
  
 local function thinkdamnit()
     if !holsteredgunsconvar:GetBool() then return end
-	if GAMEMODE:GmodLoadScript() then return end
     for _,pl in pairs(player.GetAll()) do
         if !IsValid(pl) then continue end
          
@@ -124,7 +123,6 @@ end
  
 local function playerdrawdamnit(pl,legs)
     if !holsteredgunsconvar:GetBool() then return end
-	if GAMEMODE:GmodLoadScript() then return end
     if !IsValid(pl) then return end
     if !pl.CL_CS_WEPS then return end
     for i,v in pairs(pl.CL_CS_WEPS) do

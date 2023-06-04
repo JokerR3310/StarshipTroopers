@@ -26,10 +26,10 @@ ENT.Gibs = {
 	Model("models/buildables/Gibs/dispenser_gib2.mdl"),
 	Model("models/buildables/Gibs/dispenser_gib3.mdl"),
 	Model("models/buildables/Gibs/dispenser_gib4.mdl"),
-	Model("models/buildables/Gibs/dispenser_gib5.mdl"),
+	Model("models/buildables/Gibs/dispenser_gib5.mdl")
 }
 
-ENT.Range = 100
+ENT.Range = 70
 
 function ENT:StartSupply(pl)
 	self.NumClients = self.NumClients + 1
@@ -130,7 +130,7 @@ function ENT:OnThinkActive()
 	if not self.NextSearch or CurTime()>=self.NextSearch then
 		local removedclients = table.Copy(self.Clients)
 		for _,v in pairs(ents.FindInSphere(self:GetPos(), self.Range)) do
-			if v:IsPlayer() then
+			if v:IsPlayer() and v:Alive() then
 				if self.Clients[v] then
 					-- Don't remove that client
 					removedclients[v] = nil
@@ -152,7 +152,7 @@ function ENT:OnThinkActive()
 		local metal_after = metal_before
 		
 		for k,_ in pairs(self.Clients) do
-			if k:IsPlayer() then				
+			if k:IsPlayer() and k:Alive() then
 				if k:GetAmmoCount("buckshot") < 200 then
 					k:SetAmmo( math.Clamp( k:GetAmmoCount("buckshot") + self.AmmoPerSupply, 0, 200), "buckshot")
 					self:EmitSound(self.Sound_Pickup, 100, 100)

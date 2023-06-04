@@ -31,33 +31,56 @@ function ENT:AcceptInput(ply, caller)
 	end
 end
 
+local female_snd = {
+	"vo/npc/female01/finally.wav",
+	"vo/npc/female01/fantastic01.wav",
+	"vo/npc/female01/fantastic02.wav",
+}
+
+local male_snd = {
+	"vo/npc/male01/evenodds.wav",
+	"vo/npc/male01/oneforme.wav",
+	"vo/npc/male01/finally.wav",
+	"vo/npc/male01/fantastic01.wav",
+	"vo/npc/male01/fantastic02.wav",
+}
+
+local function dovoice(ply)
+	if not ply:GetNetVar("Taunt", false) then
+		local getgender = string.find(string.lower(ply:GetModel()), "mobileinfantry/fmi")
+
+		if getgender then
+			ply:EmitSound(Sound(female_snd[math.random(#female_snd)]))
+		else
+			ply:EmitSound(Sound(male_snd[math.random(#male_snd)]))
+		end
+
+		ply:SetNetVar("Taunt", true)
+	end
+end
+
 net.Receive( "AmmoBuy", function(len, ply)	
 	local amount = net.ReadString()
 	local ammotype = net.ReadString()
-	local price = net.ReadString()
-	
-	local cost
-	
-	if GAMEMODE:GetGameState() == STATE_ROUND_OVER then
-		cost = price / 2
-	else
-		cost = price
-	end
+	local price = net.ReadInt( 10 )
+	local getcredits = tonumber(ply:GetNetVar("Credits", 0))
+	local cost = GAMEMODE:GetGameState() == STATE_ROUND_OVER and price / 2 or price
 
-	if !ply:Money_Has(cost) then ply:ChatPrint("You don't have enough points, go into battle and kill a couple of bugs to get more points!") return end
-		
-	ply:Money_Take(cost)
-		
-	ply:GiveAmmo(amount,ammotype)
+	if getcredits < cost then ply:ChatPrint("You don't have enough Credits, go into battle and kill a couple of bugs to get more Credits!") return end
+	
+	dovoice(ply)
+	ply:SetNetVar("Credits", getcredits - cost)
+	ply:GiveAmmo(amount, ammotype)
 end)
 
 net.Receive( "WeaponBuy", function(len, ply)
 	local wep = net.ReadString()
-	local price = net.ReadString()
+	local price = net.ReadInt( 10 )
+	local getcredits = tonumber(ply:GetNetVar("Credits", 0))
 
-	if !ply:Money_Has(price) then ply:ChatPrint("You do not have points, go into battle and kill a couple of bugs to get more points!") return end
+	if getcredits < price then ply:ChatPrint("You don't have enough Credits, go into battle and kill a couple of bugs to get more Credits!") return end
 
-	ply:Money_Take(price)
-
+	dovoice(ply)
+	ply:SetNetVar("Credits", getcredits - price)
 	ply:Give(wep)
 end)

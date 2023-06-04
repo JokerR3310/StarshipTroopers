@@ -34,10 +34,10 @@ SWEP.HitBuildingSuccess = Sound("Weapon_Wrench.HitBuilding_Success")
 SWEP.HitBuildingFailure = Sound("Weapon_Wrench.HitBuilding_Failure")
 
 local Npclist = {
-	["npc_antlion"]=true,
-	["npc_antlion_worker"]=true,
-	["npc_antlionguard"]=true,
-	["bug_tanker"]=true
+    ["npc_antlion"] = true,
+    ["npc_antlion_worker"] = true,
+    ["npc_antlionguard"] = true,
+    ["bug_tanker"] = true
 }
 
 function SWEP:Holster()
@@ -49,87 +49,101 @@ function SWEP:Deploy()
 	return true
 end
 
-function SWEP:PrimaryAttack(tr)
-	if SERVER then
-		local tr = util.TraceHull({
-			start = self.Owner:GetShootPos(),
-			endpos = self.Owner:GetShootPos() + (self.Owner:GetAimVector() * 66),
-			mins = self.Mins,
-			maxs = self.Maxs,
-			filter = self.Owner
-		})
-		
-	local ent = tr.Entity
+function SWEP:PrimaryAttack()
+    if SERVER then
+        local tracedata = {}
+        tracedata.start = self:GetOwner():GetShootPos()
+        tracedata.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 66
+        tracedata.filter = self:GetOwner()
+        tracedata.mins = self.Mins
+        tracedata.maxs = self.Maxs
 
-	local dmginfo = DamageInfo()
-		dmginfo:SetDamagePosition(tr.HitPos)
-		dmginfo:SetDamageType(DMG_CLUB)
-		dmginfo:SetAttacker(self.Owner)
-		dmginfo:SetInflictor(self.Owner)
-		dmginfo:SetDamage(20) -- 12
-	
-	if ent and ent:IsValid() then
-		if ent.Building then	
-			local m = ent:AddMetal(self.Owner, self.Owner:GetAmmoCount("AirboatGun"))
-			if m > 0 then
-				self.Owner:EmitSound(self.HitBuildingSuccess)
-				self.Owner:RemoveAmmo(m, "AirboatGun")
-				if game.SinglePlayer() and ent:GetState() == 3 then 
-					ent:RestartGesture(ACT_RANGE_ATTACK1) 
-				end
-			elseif ent:GetState() == 1 then
-				self.Owner:EmitSound(self.HitBuildingSuccess)
-			else
-				self.Owner:EmitSound(self.HitBuildingFailure)
-			end
-		else
-			self.Owner:EmitSound(self.HitFlesh)
-			if !ent:IsPlayer() then
-				if ent:IsNPC() and Npclist[ent:GetClass()] then
-					ent:TakeDamageInfo(dmginfo)
-				end
-			end
-		end
-	elseif ent:IsWorld() then
-		self.Owner:EmitSound(self.HitWorld)
-	else
-		self.Owner:EmitSound(self.Swing)
-	end
+        if self:GetOwner():IsPlayer() then
+            self:GetOwner():LagCompensation(true)
+        end
 
-	self.Weapon:SetNextPrimaryFire(CurTime() + 0.75)
-	end
-	self.Owner:SetAnimation(PLAYER_ATTACK1)
-	self.Weapon:SendWeaponAnim(ACT_VM_MISSCENTER)
+        local tr = util.TraceHull(tracedata)
+
+        if self:GetOwner():IsPlayer() then
+            self:GetOwner():LagCompensation(false)
+        end
+
+        local ent = tr.Entity
+        local dmginfo = DamageInfo()
+        dmginfo:SetDamagePosition(tr.HitPos)
+        dmginfo:SetDamageType(DMG_CLUB)
+        dmginfo:SetAttacker(self:GetOwner())
+        dmginfo:SetInflictor(self:GetOwner())
+        dmginfo:SetDamage(20) -- 12
+
+        if IsValid(ent) then
+            if ent.Building then
+                local m = ent:AddMetal(self:GetOwner(), self:GetOwner():GetAmmoCount("AirboatGun"))
+
+                if m > 0 then
+                    self:GetOwner():EmitSound(self.HitBuildingSuccess)
+                    self:GetOwner():RemoveAmmo(m, "AirboatGun")
+
+                    if game.SinglePlayer() and ent:GetState() == 3 then
+                        ent:RestartGesture(ACT_RANGE_ATTACK1)
+                    end
+                elseif ent:GetState() == 1 then
+                    self:GetOwner():EmitSound(self.HitBuildingSuccess)
+                else
+                    self:GetOwner():EmitSound(self.HitBuildingFailure)
+                end
+            else
+                self:GetOwner():EmitSound(self.HitFlesh)
+
+                if Npclist[ent:GetClass()] then
+                    ent:TakeDamageInfo(dmginfo)
+                end
+            end
+        elseif ent:IsWorld() then
+            self:GetOwner():EmitSound(self.HitWorld)
+        else
+            self:GetOwner():EmitSound(self.Swing)
+        end
+
+        self:SetNextPrimaryFire(CurTime() + 0.8)
+    end
+
+    self:GetOwner():SetAnimation(PLAYER_ATTACK1)
+    self:SendWeaponAnim(ACT_VM_MISSCENTER)
 end
 
-function SWEP:SecondaryAttack(tr)
-	if SERVER then
-		local tr = util.TraceHull({
-			start = self.Owner:GetShootPos(),
-			endpos = self.Owner:GetShootPos() + (self.Owner:GetAimVector() * 66),
-			mins = self.Mins,
-			maxs = self.Maxs,
-			filter = self.Owner
-		})
-		
-	local ent = tr.Entity
-	
-	if self.Owner:KeyDown(IN_USE) then
-		if ent and ent:IsValid() then
-			if ent.Building then
-				local state = ent:GetState()
-				if state != 3 then return end
-				local builder = ent:GetBuilder()
-				if builder == self.Owner then
-					ent:Remove()
-					self.Owner:ChatPrint("Building has been dismantled!")
-					self.Owner:SetAmmo(math.Clamp(self.Owner:GetAmmoCount("AirboatGun") + 100, 0, 200), "AirboatGun")
+function SWEP:SecondaryAttack()
+    if SERVER then
+        local tracedata = {}
+        tracedata.start = self:GetOwner():GetShootPos()
+        tracedata.endpos = self:GetOwner():GetShootPos() + self:GetOwner():GetAimVector() * 66
+        tracedata.filter = self:GetOwner()
+        tracedata.mins = self.Mins
+        tracedata.maxs = self.Maxs
 
-					self.Owner:EmitSound("vo/engineer_sentrypacking0"..math.random(1,3)..".mp3", 80, 95)
-				end
-			end
-		end
-	end
-		self.Weapon:SetNextSecondaryFire(CurTime() + 1.2)
-	end
+        if self:GetOwner():IsPlayer() then
+            self:GetOwner():LagCompensation(true)
+        end
+
+        local tr = util.TraceHull(tracedata)
+
+        if self:GetOwner():IsPlayer() then
+            self:GetOwner():LagCompensation(false)
+        end
+
+        local ent = tr.Entity
+
+        if self:GetOwner():KeyDown(IN_USE) and IsValid(ent) and ent.Building then
+            if ent:GetState() ~= 3 then return end
+
+            if ent:GetBuilder() == self:GetOwner() then
+                ent:Remove()
+                self:GetOwner():ChatPrint("Building has been dismantled!")
+                self:GetOwner():SetAmmo(math.Clamp(self:GetOwner():GetAmmoCount("AirboatGun") + 100, 0, 200), "AirboatGun")
+                self:GetOwner():EmitSound("vo/engineer_sentrypacking0" .. math.random(1, 3) .. ".mp3", 80, 95)
+            end
+        end
+
+        self:SetNextSecondaryFire(CurTime() + 1.2)
+    end
 end

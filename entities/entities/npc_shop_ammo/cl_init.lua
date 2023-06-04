@@ -30,7 +30,8 @@ usermessage.Hook( 'open_ammo_shop2', function(pl)
 		frame:MakePopup()
 	function frame:Paint( w, h )
 		draw.RoundedBox( 0, 0, 0, w, h, Color(30, 30, 30, 195))
-		draw.SimpleTextOutlined("Merchant | You have: "..LocalPlayer():GetNWInt( "cash" ).." Points", "HudHintTextLarge", 11, 10, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT, 1, Color(0,0,0,255))
+		--draw.SimpleTextOutlined("Merchant | You have: "..LocalPlayer():GetNWInt( "cash" ).." Points", "HudHintTextLarge", 11, 10, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT, 1, Color(0,0,0,255))
+		draw.SimpleTextOutlined("Merchant | You have: ".. tonumber(LocalPlayer():GetNetVar("Credits", 0)) .." Credits", "HudHintTextLarge", 11, 10, Color(255,255,255,255), TEXT_ALIGN_LEFT, TEXT_ALIGN_LEFT, 1, Color(0,0,0,255))
 	end
 
 	local PropertySheet = vgui.Create( "DPropertySheet", frame)
@@ -54,15 +55,21 @@ usermessage.Hook( 'open_ammo_shop2', function(pl)
 			draw.RoundedBox( 0, 0, 0, w-2, h-5, Color(90, 90, 90, 155))
 			draw.DrawText( tostring( v["label"]), "ScoreboardHeader", 70, 4, Color(30, 30, 30, 255))
 			if GAMEMODE:GetGameState() == STATE_ROUND_OVER then
-				draw.DrawText( tostring( v["price"] / 2) .. " $","ScoreboardHeader",380,0,Color(30, 30, 30, 255), TEXT_ALIGN_RIGHT)
+				draw.DrawText( tostring( v["price"] / 2),"ScoreboardHeader",350,0,Color(30, 30, 30, 255), TEXT_ALIGN_RIGHT)
 	
 				draw.RoundedBox(0, 340, 30, 40, 18, Color(60, 190, 60, 175))
 				draw.DrawText("-50%","ScoreboardText", 361, 30.5, Color(180, 245, 180, 255), TEXT_ALIGN_CENTER)
 			else
-				draw.DrawText( tostring( v["price"]) .. " $","ScoreboardHeader", 380, 0, Color(30, 30, 30, 255), TEXT_ALIGN_RIGHT)
+				draw.DrawText( tostring( v["price"]),"ScoreboardHeader", 350, 0, Color(30, 30, 30, 255), TEXT_ALIGN_RIGHT)
 			end
 			draw.DrawText( tostring( v["desc"]),"ScoreboardText", 70, 37, Color(10, 10, 10, 255))
 		end
+		
+		local img = vgui.Create( "DImage", bar )
+		img:SetPos( 360, 7 )
+		img:SetSize( 16, 16 )
+		img:SetImage( "icon16/coins.png" )
+		
 		local icon = vgui.Create( "SpawnIcon", bar )
 		icon:SetModel( v["model"] )
 		icon:SetPos( 4, 4 )
@@ -74,7 +81,7 @@ usermessage.Hook( 'open_ammo_shop2', function(pl)
 			net.Start( "AmmoBuy" )
 				net.WriteString( amount )
 				net.WriteString( ammo )
-				net.WriteString( price )
+				net.WriteInt( price, 10 )
 			net.SendToServer()
 		end
 		IconList:AddItem( bar ) 
@@ -105,9 +112,15 @@ usermessage.Hook( 'open_ammo_shop2', function(pl)
 			function bar:Paint( w, h )
 				draw.RoundedBox( 0, 0, 0, w-2, h-5, Color(90, 90, 90, 155))
 				draw.DrawText( tostring( v["label"]), "ScoreboardHeader2", 70, 4, Color(30, 30, 30, 255))
-				draw.DrawText( tostring( v["price"]) .. " $","ScoreboardHeader", 380, 0, Color(30, 30, 30, 255), TEXT_ALIGN_RIGHT)
+				draw.DrawText( tostring( v["price"]),"ScoreboardHeader", 350, 0, Color(30, 30, 30, 255), TEXT_ALIGN_RIGHT)
 				draw.DrawText( tostring( v["desc"]),"ScoreboardText", 70, 37, Color(10, 10, 10, 255))
 			end
+			
+			local img = vgui.Create( "DImage", bar )
+			img:SetPos( 360, 7 )
+			img:SetSize( 16, 16 )
+			img:SetImage( "icon16/coins.png" )
+			
 			local icon = vgui.Create( "SpawnIcon", bar )
 			icon:SetModel( v["model"] )
 			icon:SetPos( 4, 4 )
@@ -117,7 +130,7 @@ usermessage.Hook( 'open_ammo_shop2', function(pl)
 				local price = v["price"]
 				net.Start( "WeaponBuy" )
 					net.WriteString( wep )
-					net.WriteString( price )
+					net.WriteInt( price, 10 )
 				net.SendToServer()
 			end
 			IconList2:AddItem( bar ) 

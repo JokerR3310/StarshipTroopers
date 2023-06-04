@@ -11,7 +11,7 @@ ST_AmmoList = {
 		["amount"] = "1",
 		["ammotype"] = "SMG1_Grenade",
 		["allowedfor"] = {"player_engineer"},
-		["price"] = "20"
+		["price"] = "10"
 	},
 	["SMG"] = {
 		["label"] = "SMG Ammo",
@@ -20,7 +20,7 @@ ST_AmmoList = {
 		["amount"] = "30",
 		["ammotype"] = "SMG1",
 		["allowedfor"] = {"player_soldier", "player_medic", "player_sniper"},
-		["price"] = "10"
+		["price"] = "4"
 	},
 	["RPG"] = {
 		["label"] = "RPG Round",
@@ -29,7 +29,7 @@ ST_AmmoList = {
 		["amount"] = "1",
 		["ammotype"] = "RPG_Round",
 		["allowedfor"] = {"player_soldier"},
-		["price"] = "36"
+		["price"] = "14"
 	},
 	["CROSSBOW"] = {
 		["label"] = "Railgun Ammo",
@@ -38,7 +38,7 @@ ST_AmmoList = {
 		["amount"] = "6",
 		["ammotype"] = "XBowBolt",
 		["allowedfor"] = {"player_sniper"},
-		["price"] = "16"
+		["price"] = "10"
 	},
 	["SHOTGUN"] = {
 		["label"] = "Buckshot",
@@ -47,7 +47,7 @@ ST_AmmoList = {
 		["amount"] = "20",
 		["ammotype"] = "Buckshot",
 		["allowedfor"] = {"player_soldier", "player_engineer", "player_medic"},
-		["price"] = "8"
+		["price"] = "4"
 	},
 	["GRENADE"] = {
 		["label"] = "Hand Grenade",
@@ -76,7 +76,7 @@ ST_WeaponList = {
 		["desc"] = "Tactical rocket launcher.",
 		["weapontype"] = "st_tactical_launcher",
 		["allowedfor"] = {"player_soldier"},
-		["price"] = "350"
+		["price"] = "300"
 	},
 	["SHOTGUN_SOLDI"] = {
 		["label"] = "Morita MK II Shotgun",
@@ -92,7 +92,7 @@ ST_WeaponList = {
 		["desc"] = "Physics Cannon.",
 		["weapontype"] = "weapon_physcannon",
 		["allowedfor"] = {"player_engineer"},
-		["price"] = "40"
+		["price"] = "30"
 	},
 	["RAILGUN"] = {
 		["label"] = "Morita Mk3 Railgun",

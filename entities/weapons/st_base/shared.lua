@@ -120,6 +120,7 @@ function SWEP:PrimaryAttack()
 	end
 
 	self:FireShotPrim()
+
 	self:EmitSound(self.Primary.Sound, 120)
 	self:TakePrimaryAmmo(1)
 	user:SetAnimation(PLAYER_ATTACK1)
@@ -150,10 +151,13 @@ function SWEP:FireShotPrim()
 	bullet.TracerName = self.Primary.TracerName
 	bullet.Force = 10
 
-	local GAME_DIFFICULTY = GetConVar("stg_game_difficulty"):GetInt()
-	local max = math.Round(math.Remap(GAME_DIFFICULTY, 1, 3, 6, 0))
+	if SERVER then
+		local GAME_DIFFICULTY = GetConVar("stg_game_difficulty"):GetInt()
+		local max = math.Round(math.Remap(GAME_DIFFICULTY, 1, 3, 6, 0))
 
-	bullet.Damage = math.Round(math.random(self.Primary.DamageMin,self.Primary.DamageMax) + max)
+		bullet.Damage = math.Round(math.random(self.Primary.DamageMin,self.Primary.DamageMax) + max)
+	end
+
 	bullet.AmmoType = self.Primary.Ammo
 
 	if user:IsNPC() then

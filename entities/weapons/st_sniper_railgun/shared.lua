@@ -12,7 +12,7 @@ SWEP.AdminOnly = true
 SWEP.Primary.Sound = Sound("sfx_railgun_fire.wav")
 SWEP.Primary.RPM = 80
 SWEP.Primary.ClipSize = 6
-SWEP.Primary.DefaultClip = 25
+SWEP.Primary.DefaultClip = 6
 SWEP.Primary.Automatic = false
 SWEP.Primary.Ammo = "XBowBolt"
 

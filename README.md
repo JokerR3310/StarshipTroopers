@@ -1,10 +1,10 @@
-# Starship Troopers Gamemode - BETA 0.8.1
+# Starship Troopers Gamemode - BETA 0.8.2
 
-Steam Workshop link, ver. 0.8.1
+Steam Workshop link, ver. 0.8.2
 
 http://steamcommunity.com/sharedfiles/filedetails/?id=197393073
 
-# How to instal Legacy version:
+# HOW TO INSTAL:
   
 • First, you need to unsubscribe from workshop version.
 

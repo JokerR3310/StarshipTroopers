@@ -17,9 +17,9 @@ SWEP.Primary.DamageMin		= 10
 
 SWEP.Secondary.Sound 		= Sound("sfx_shotgun_primary_fire.wav")	// Sound of the gun
 SWEP.Secondary.RPM			= 60							// This is in Rounds Per Minute
-SWEP.Secondary.ClipSize		= 16							// Size of a clip
-SWEP.Secondary.DefaultClip	= 1								// Default number of bullets in a clip
-SWEP.Secondary.Ammo			= "SMG1"
+SWEP.Secondary.ClipSize		= -1
+SWEP.Secondary.DefaultClip	= -1
+SWEP.Secondary.Ammo			= "none"
 SWEP.Secondary.DamageMax	= 20
 SWEP.Secondary.DamageMin	= 10
 

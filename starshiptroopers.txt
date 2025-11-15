@@ -6,4 +6,19 @@
 	"category"	"pve"
 	"menusystem"	"1"
 	"workshopid"	"197393073"
+
+	"settings"
+	{
+		1
+		{
+			"name"		"stg_game_difficulty"
+			"text"		"Game difficulty: Easy << 1-2-3 >> Hard"
+			"help"		"Game difficulty: 1 - Easy, 2 - Normal, 3 - Hard"
+			"type"		"Numeric"
+			"default"	"2"
+			"replicate"	"2"
+			"singleplayer" "1"
+		}
+	}
+
 }

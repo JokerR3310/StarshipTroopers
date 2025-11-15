@@ -49,38 +49,47 @@ end
 
 function SWEP:PrimaryAttack()
 
-	if ( CLIENT ) then return end
+	if CLIENT then return end
+	
+	local user = self:GetOwner()
 
-	local tr = util.TraceLine( {
-		start = self.Owner:GetShootPos(),
-		endpos = self.Owner:GetShootPos() + self.Owner:GetAimVector() * 64,
-		filter = self.Owner
-	} )
+	user:LagCompensation( true )
+
+	local tr = util.TraceLine({
+		start = user:GetShootPos(),
+		endpos = user:GetShootPos() + user:GetAimVector() * 64,
+		filter = user
+	})
 
 	local ent = tr.Entity
-	
-	local need = self.HealAmount
-	if ( IsValid( ent ) ) then need = math.min( ent:GetMaxHealth() - ent:Health(), self.HealAmount ) end
 
-	if ( IsValid( ent ) && self:Clip1() >= need && ( ent:IsPlayer() || ent:IsPlayer() ) && ent:Health() < 100 ) then
+	user:LagCompensation( false )
+
+	local need = self.HealAmount
+
+	if IsValid( ent ) and (ent:IsPlayer() or ent:IsNPC()) then 
+		need = math.min( ent:GetMaxHealth() - ent:Health(), self.HealAmount ) 
+	end
+
+	if ( IsValid( ent ) && self:Clip1() >= need && ( ent:IsPlayer() || ent:IsNPC() ) && ent:Health() < ent:GetMaxHealth() and ent:GetClass() == "npc_citizen" ) then
 
 		self:TakePrimaryAmmo( need )
 
 		ent:SetHealth( math.min( ent:GetMaxHealth(), ent:Health() + need ) )
-		self.Owner:EmitSound( Sound( "vo/npc/male01/health0"..math.random(1, 5)..".wav" ) )
+		user:EmitSound( "vo/npc/male01/health0" .. math.random(1, 5) .. ".wav" )
 		ent:EmitSound( HealSound )
 
 		self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
 
 		self:SetNextPrimaryFire( CurTime() + self:SequenceDuration() + 1 )
-		self.Owner:SetAnimation( PLAYER_ATTACK1 )
+		user:SetAnimation( PLAYER_ATTACK1 )
 
 		-- Even though the viewmodel has looping IDLE anim at all times, we need this to make fire animation work in multiplayer
 		timer.Create( "weapon_idle" .. self:EntIndex(), self:SequenceDuration(), 1, function() if ( IsValid( self ) ) then self:SendWeaponAnim( ACT_VM_IDLE ) end end )
 
 	else
 
-		self.Owner:EmitSound( DenySound )
+		user:EmitSound( DenySound )
 		self:SetNextPrimaryFire( CurTime() + 1 )
 
 	end
@@ -89,19 +98,21 @@ end
 
 function SWEP:SecondaryAttack()
 
-	if ( CLIENT ) then return end
+	if CLIENT then return end
 
-	local ent = self.Owner
-	
+	local user = self:GetOwner()
 	local need = self.HealAmount
-	if ( IsValid( ent ) ) then need = math.min( ent:GetMaxHealth() - ent:Health(), self.HealAmount ) end
 
-	if ( IsValid( ent ) && self:Clip1() >= need && ent:Health() < ent:GetMaxHealth() ) then
+	if IsValid( user ) then 
+		need = math.min( user:GetMaxHealth() - user:Health(), self.HealAmount )
+	end
+
+	if ( IsValid( user ) && self:Clip1() >= need && user:Health() < user:GetMaxHealth() ) then
 
 		self:TakePrimaryAmmo( need )
 
-		ent:SetHealth( math.min( ent:GetMaxHealth(), ent:Health() + need ) )
-		ent:EmitSound( HealSound )
+		user:SetHealth( math.min( user:GetMaxHealth(), user:Health() + need ) )
+		user:EmitSound( HealSound )
 
 		self:SendWeaponAnim( ACT_VM_PRIMARYATTACK )
 
@@ -112,7 +123,7 @@ function SWEP:SecondaryAttack()
 
 	else
 
-		ent:EmitSound( DenySound )
+		user:EmitSound( DenySound )
 		self:SetNextSecondaryFire( CurTime() + 1 )
 
 	end

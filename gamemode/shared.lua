@@ -1,8 +1,22 @@
 GM.Name = "Starship Troopers"
-GM.Author = "-=JokerR |CMBG|=-"
-GM.Version = "BETA 0.8.1"
+GM.Author = "JokerR"
+GM.Version = "BETA 0.8.2"
 
 DeriveGamemode("sandbox") -- Dev mode
+
+if file.Exists(GM.FolderName .. "/gamemode/maps/" .. game.GetMap() .. ".lua", "LUA") then
+	if SERVER then
+		AddCSLuaFile("maps/" .. game.GetMap() .. ".lua")
+	end
+
+	include("maps/" .. game.GetMap() .. ".lua")
+else
+	if SERVER then
+		AddCSLuaFile("maps/unsupported.lua")
+	end
+
+	include("maps/unsupported.lua")
+end
 
 include("player_class/player_engineer.lua")
 include("player_class/player_medic.lua")
@@ -10,14 +24,14 @@ include("player_class/player_soldier.lua")
 include("player_class/player_sniper.lua")
 
 -- Pre Load ConVars
-GM.RoundLimit = GetConVar("wave_amount") 
-GM.RoundLength = GetConVar("wave_length")
-GM.RoundPostEndTime = GetConVar("wave_post_end")
+GM.RoundLimit = ConVarExists("wave_amount") and GetConVar("wave_amount") or CreateConVar("wave_amount", 12, FCVAR_REPLICATED, "Total rounds amount.") -- 12
+GM.RoundLength = ConVarExists("wave_length") and GetConVar("wave_length") or CreateConVar("wave_length", 120, FCVAR_REPLICATED, "Round length in seconds.") -- 120
+GM.RoundPostEndTime = ConVarExists("wave_post_end") and GetConVar("wave_post_end") or CreateConVar("wave_post_end", 62, FCVAR_REPLICATED, "Seconds between round end and round start.") -- 62
 
-team.SetUp(1, "Player", Color(0, 0, 255))
-team.SetUp(2, "Engi", Color(0, 0, 255))
+team.SetUp(1, "Player", Color(156, 204, 210))
+team.SetUp(2, "Engi", Color(156, 204, 210))
 
-function GM:GetGameDescription() 
+function GM:GetGameDescription()
  	return "Starship Troopers - Outpost Defence Simulator 2015"
 end
 
@@ -57,9 +71,9 @@ function GM:PlayerSpawn( pl )
 	end
 
 	pl:SetNoTarget(false)
-	
+
 	pl:UnSpectate()	
-	
+
 	player_manager.OnPlayerSpawn( pl )
 	player_manager.RunClass( pl, "Loadout" )
 	player_manager.RunClass( pl, "SetModel" )

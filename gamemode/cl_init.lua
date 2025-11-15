@@ -19,11 +19,7 @@ include("mapvote/cl_mapvote.lua")
 
 include("st_config.lua")
 
-game.AddParticles( "particles/antlion_gib_02.pcf" )
-game.AddParticles( "particles/antlion_worker.pcf" )
 game.AddParticles( "particles/sparks.pcf" )
-
-surface.CreateFont( "st_timer_text", { font = "Roboto", size = 23, weight = 600, antialias = true } )
 
 function GM:Initialize()
 	RunConsoleCommand("gmod_mcore_test", "1")
@@ -38,17 +34,18 @@ timer.Simple(5, function()
 	RunConsoleCommand("r_drawmodeldecals", "0")
 end)
 
-local HUDToHide = {
-	["CHudHealth"]=true,
-	["CHudBattery"]=true,
-	["CHudAmmo"]=true,
-	["CHudSecondaryAmmo"]=true
+local hide = {
+	["CHudHealth"] = true,
+	["CHudBattery"] = true,
+	["CHudAmmo"] = true,
+	["CHudSecondaryAmmo"] = true
 }
 
-function GM:HUDShouldDraw(name)
-	if HUDToHide[name] then return false end
-	return true
-end
+hook.Add("HUDShouldDraw", "HideHUD", function(name)
+	if hide[name] then
+		return false
+	end
+end)
 
 function GM:OnRoundStart( num ) -- Unused hook run on round start where num is the round number.
 end

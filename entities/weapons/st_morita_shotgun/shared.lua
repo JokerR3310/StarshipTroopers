@@ -11,9 +11,9 @@ SWEP.Spawnable			= true
 SWEP.AdminOnly			= true
 
 SWEP.Primary.Sound 			= Sound("sfx_shotgun_primary_fire.wav")			// Sound of the gun
-SWEP.Primary.RPM			= 110					// This is in Rounds Per Minute
+SWEP.Primary.RPM			= 130					// This is in Rounds Per Minute
 SWEP.Primary.ClipSize		= 20					// Size of a clip
-SWEP.Primary.DefaultClip	= 114				// Default number of bullets in a clip 114
+SWEP.Primary.DefaultClip	= 20				// Default number of bullets in a clip 114
 SWEP.Primary.Ammo			= "Buckshot"	
 SWEP.Primary.DamageMax 		= 10
 SWEP.Primary.DamageMin		= 6
@@ -22,12 +22,12 @@ SWEP.Primary.RangeMin		= 600
 
 function SWEP:FireShotPrim()
 	local bullet = {}
-    bullet.Num       	= 6
+    bullet.Num       	= 12
     bullet.Src       	= self.Owner:GetShootPos()           // Source
     bullet.Dir       	= self.Owner:GetAimVector()           // Dir of bullet
-    bullet.Spread    	= Vector( 0.1, 0.1, 0.1 )        // Aim Cone
+    bullet.Spread    	= Vector( 0.07, 0.07, 0 )        // Aim Cone
     bullet.Tracer  	 	= 1                                    // Show a tracer on every x bullets
-    bullet.Force    	= 1                                   // Amount of force to give to phys objects
+    bullet.Force    	= 10                                   // Amount of force to give to phys objects
     bullet.Damage   	= 0
     bullet.AmmoType 	= self.Primary.Ammo
 	bullet.Callback	= function( attack, trace, dmginfo )

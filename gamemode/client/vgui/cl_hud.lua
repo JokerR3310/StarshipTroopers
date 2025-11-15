@@ -8,9 +8,37 @@ local surface = surface
 local string = string
 local math = math
 
+local col = Color( 255, 80, 0, 255 )
+
+killicon.Add("func_tank", "hud/killicons/func_tank", col)
+
+killicon.Add("npc_antlionguard", "hud/killicons/npc_antlionguard", col)
+killicon.Add("npc_antlion", "hud/killicons/npc_antlion", col)
+killicon.AddAlias("npc_antlion_worker", "npc_antlion")
+
+killicon.Add("st_carbine_shotgun", "hud/killicons/st_carbine_shotgun", col)
+killicon.Add("st_carbine_short", "hud/killicons/st_carbine_short", col)
+killicon.Add("st_carbine_sniper", "hud/killicons/st_carbine_sniper", col)
+killicon.Add("st_morita_assault_rifle", "hud/killicons/st_morita_assault_rifle", col)
+killicon.Add("st_morita_shotgun", "hud/killicons/st_morita_shotgun", col)
+
+killicon.Add("grenade_spit", "hud/killicons/grenade_spit", col)
+killicon.Add("env_explosion", "hud/killicons/env_explosion", col)
+killicon.AddAlias("st_nade", "env_explosion")
+killicon.AddAlias("tiramisu_fragnade", "env_explosion")
+killicon.AddAlias("tiramisu_rpg_heat", "env_explosion")
+
+killicon.Add("npc_helicopter", "hud/killicons/npc_helicopter", col)
+killicon.Add("env_headcrabcanister", "hud/killicons/env_headcrabcanister", col)
+
+killicon.Add("st_wrench", "hud/killicons/st_wrench", col)
+killicon.Add("obj_sentrygun", "hud/killicons/obj_sentrygun", col)
+
+surface.CreateFont( "st_timer_text", { font = "Roboto", size = 23, weight = 600, antialias = true } )
+
 local interactivetips = CreateConVar("cl_intips", "0", {FCVAR_ARCHIVE}, "Enable/Disable Interactive tips.")
 
-local middle = ScrW()/2
+local middle = ScrW() / 2
 
 local armor = Material("hud_elements/armor.png")
 local shield = Material("icon16/shield.png")
@@ -18,9 +46,74 @@ local hp = Material("hud_elements/hp.png")
 local heart = Material("icon16/heart.png")
 local bug = Material("icon16/bug.png")
 
-function GM:HUDPaint() 
-	if not LocalPlayer() or not IsValid(LocalPlayer()) then return end
-	
+function GM:HUDDrawTargetID()
+
+	local trace = LocalPlayer():GetEyeTrace()
+	if ( !trace.Hit ) then return end
+	if ( !trace.HitNonWorld ) then return end
+
+	local text = "ERROR"
+	local font = "ChatFont"
+	local skip = false
+
+	if trace.Entity:IsPlayer() then
+		text = trace.Entity:Nick()
+	elseif trace.Entity:IsNPC() then
+		if trace.Entity:GetClass() == "npc_citizen" then
+			text = "Marine Soldier"
+		elseif trace.Entity:GetClass() == "npc_barney" then
+			text = "Lieutenant"
+			skip = true
+		else
+			return
+		end
+	else
+		return
+	end
+
+	surface.SetFont( font )
+	local w, h = surface.GetTextSize( text )
+
+	local MouseX, MouseY = input.GetCursorPos()
+
+	if ( MouseX == 0 && MouseY == 0 || !vgui.CursorVisible() ) then
+
+		MouseX = ScrW() / 2
+		MouseY = ScrH() / 2
+
+	end
+
+	local x = MouseX
+	local y = MouseY
+
+	x = x - w / 2
+	y = y + 30
+
+	-- The fonts internal drop shadow looks lousy with AA on
+	draw.SimpleText( text, font, x + 1, y + 1, Color( 0, 0, 0, 120 ) )
+	draw.SimpleText( text, font, x + 2, y + 2, Color( 0, 0, 0, 50 ) )
+	draw.SimpleText( text, font, x, y, self:GetTeamColor( trace.Entity ) )
+
+	if skip then return end
+
+	y = y + h + 5
+
+	-- Draw the health
+	local absolutehealth = math.Remap(trace.Entity:Health(), 0, trace.Entity:GetMaxHealth(), 0, 100)
+	text = math.Round(absolutehealth) .. "%"
+	font = "ChatFont"
+
+	surface.SetFont( font )
+	w, h = surface.GetTextSize( text )
+	x = MouseX - w / 2
+
+	draw.SimpleText( text, font, x + 1, y + 1, Color( 0, 0, 0, 120 ) )
+	draw.SimpleText( text, font, x + 2, y + 2, Color( 0, 0, 0, 50 ) )
+	draw.SimpleText( text, font, x, y, self:GetTeamColor( trace.Entity ) )
+
+end
+
+hook.Add("HUDPaint", "HUDDrawPaint", function()
 	if LocalPlayer():Team() == TEAM_SPECTATOR then
 		if not interactivetips:GetBool() then
 			draw.RoundedBox(8, middle - 90, 120, 180, 56, Color(41, 128, 185, 90))
@@ -125,9 +218,16 @@ function GM:HUDPaint()
 	-- Ammo
 	local wep = LocalPlayer():GetActiveWeapon()
 
-	if IsValid(wep) and wep.Clip1 and wep:Clip1() >= 0 then
-		draw.SimpleTextOutlined(wep:Clip1(), "DermaLarge", ScrW() / 1.145, ScrH() - 41, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1.5, Color(74, 74, 74))
-		draw.SimpleTextOutlined(" /" .. LocalPlayer():GetAmmoCount(wep:GetPrimaryAmmoType()), "DermaLarge", ScrW() / 1.145, ScrH() - 35, Color(161, 161, 161), TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
+	if IsValid(wep) then
+		if wep.Clip1 and wep:Clip1() >= 0 then
+			draw.SimpleTextOutlined(wep:Clip1(), "DermaLarge", ScrW() / 1.145, ScrH() - 41, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1.5, Color(74, 74, 74))
+			draw.SimpleTextOutlined(" /" .. LocalPlayer():GetAmmoCount(wep:GetPrimaryAmmoType()), "DermaLarge", ScrW() / 1.145, ScrH() - 35, Color(161, 161, 161), TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
+		end
+
+		if wep.Clip2 and wep:Clip2() >= 0 then
+			draw.SimpleTextOutlined(wep:Clip2(), "DermaLarge", ScrW() / 1.1, ScrH() - 41, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1.5, Color(74, 74, 74))
+			draw.SimpleTextOutlined(" /" .. LocalPlayer():GetAmmoCount(wep:GetSecondaryAmmoType()), "DermaLarge", ScrW() / 1.1, ScrH() - 35, Color(161, 161, 161), TEXT_ALIGN_LEFT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
+		end
 	end
 
 	// Engi Hud \\
@@ -195,8 +295,9 @@ function GM:HUDPaint()
 
 		draw.SimpleTextOutlined("Metal: " .. metal, "DermaLarge", ScrW() / 1.14, ScrH() / 1.2, color_white, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
 		draw.DrawText("*c", "Trebuchet24", ScrW() / 1.43, ScrH() / 1.05, Color(160, 160, 255, 180), TEXT_ALIGN_CENTER)
-		draw.RoundedBox(4, ScrW() / 1.45, ScrH() / 1.07, ScreenScale(129), ScreenScale(8), Color(57, 57, 146, 180))
-		draw.RoundedBox(2, ScrW() / 1.445, ScrH() / 1.066, ScreenScale(heat + 1), ScreenScale(6), Color(186, 186, 186, 180))
-		draw.RoundedBox(4, ScrW() / 1.14, ScrH() / 1.066, ScreenScale(8), ScreenScale(6), Color(210, 30, 30, 232))
+
+		draw.RoundedBox(4, ScrW() / 1.45, ScrH() / 1.07, 256, 16, Color(57, 57, 146, 180))
+		draw.RoundedBox(2, ScrW() / 1.445, ScrH() / 1.068, heat * 2, 12, Color(186, 186, 186, 180))
+		draw.RoundedBox(4, ScrW() / 1.160, ScrH() / 1.07, 8, 16, Color(210, 30, 30, 232))
 	end
-end
+end)

@@ -1,4 +1,3 @@
-// Variables that are used on both client and server
 SWEP.Base = "st_base"
 
 SWEP.ViewModel = "models/ryan7259/starshiptroopers/weapons/v_morita_mk4.mdl"

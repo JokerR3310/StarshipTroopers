@@ -1,16 +1,3 @@
--- Auto Load Map config
-local LoadMap = GM.FolderName .. "/gamemode/maps/" .. game.GetMap() .. ".lua"
-
-if file.Exists(LoadMap, "LUA") then
-    MsgC(Color(100, 255, 100), "# Loading config for: " .. game.GetMap() .. "... \n")
-	include(LoadMap)
-    GM.RoundLimit = ConVarExists("wave_amount") and GetConVar("wave_amount") or CreateConVar("wave_amount", 12, FCVAR_REPLICATED, "Total rounds amount.") -- 12
-    GM.RoundLength = ConVarExists("wave_length") and GetConVar("wave_length") or CreateConVar("wave_length", 120, FCVAR_REPLICATED, "Round length in seconds.") -- 120
-    GM.RoundPostEndTime = ConVarExists("wave_post_end") and GetConVar("wave_post_end") or CreateConVar("wave_post_end", 62, FCVAR_REPLICATED, "Seconds between round end and round start.") -- 62
-else
-	include(GM.FolderName .. "/gamemode/maps/unsupported.lua")
-end
-
 AddCSLuaFile("shared.lua")
 AddCSLuaFile("cl_init.lua")
 include("shared.lua")
@@ -55,7 +42,7 @@ util.AddNetworkString( "OpenHelpMenu" )
 
 resource.AddWorkshop( "197393073" )
 
-local pm = FindMetaTable("Player")
+CreateConVar("stg_game_difficulty", "2", FCVAR_NOTIFY, "Game difficulty convar: 1 - Easy, 2 - Normal, 3 - Hard", 1, 3)
 
 function GM:PlayerInitialSpawn( pl )
 	pl:SetTeam(TEAM_SPECTATOR)
@@ -64,26 +51,66 @@ function GM:PlayerInitialSpawn( pl )
 	pl:SetNetVar("Taunt", false)
 
 	PrintMessage(HUD_PRINTTALK, pl:GetName() .. " has arrived")
-	
+
 	self:ShowTeam(pl)
 	pl:ChatPrint("Welcome to Starship Troopers: Do you want to live for ever or what?!")
+
+	pl:GameSync()
 end
 
 timer.Create("TauntCooldown", 2, 0, function() 
-	for i, v in ipairs(player.GetAll()) do
-		if v:Alive() then
-			v:SetNetVar("Taunt", false)
+	for _, ply in ipairs(player.GetAll()) do
+		if ply:Alive() then
+			ply:SetNetVar("Taunt", false)
+		end
+	end
+end)
+
+timer.Create("AntlionAssaultUpdater", 10, 0, function()
+	local soldiers = {}
+
+	for _, npc in ipairs(ents.FindByClass("npc_citizen")) do
+		table.insert(soldiers, npc)
+	end
+
+	local barney = ents.FindByClass("npc_barney")[1]
+	local soldiersAlive = table.Count(soldiers)
+
+	for _, antlion in ipairs(ents.FindByClass("npc_antlion")) do
+		if not IsValid(antlion) then continue end
+
+		antlion:Fire("Wake")
+
+		if table.IsEmpty(soldiers) or soldiersAlive < 2 then
+			if IsValid(barney) then
+				antlion:UpdateEnemyMemory(barney, barney:GetPos())
+				antlion:SetEnemy(barney)
+			end
+		else
+			local rid = math.random(1, soldiersAlive)
+
+			for id, marine in ipairs(soldiers) do
+				if id ~= rid then continue end
+
+				if IsValid(marine) then
+					antlion:UpdateEnemyMemory(marine, marine:GetPos())
+					antlion:SetEnemy(marine)
+					antlion:AddEntityRelationship(marine, D_HT, 99)
+				end
+			end
+		end
+
+		if IsValid(barney) then
+			antlion:AddEntityRelationship(barney, D_HT, 99)
 		end
 	end
 end)
 
 local ArmorNextThink = 0
-local DomNextThink = 0
-local DomNextTone = 0
 function GM:PlayerPostThink(ply)
 	local curtime = CurTime()
 
-	if curtime > ArmorNextThink then
+	if ArmorNextThink < curtime then
 		if ply:Alive() and ply:Armor() < 100 and (ply.NextArmorRegen or 0) < curtime then
 			ply:SetArmor( ply:Armor() + 1 )
 		end
@@ -93,16 +120,18 @@ function GM:PlayerPostThink(ply)
 
     if player_manager.GetPlayerClass(ply) == "player_engineer" then
         local heat = tonumber(ply:GetNetVar("Heat", 0))
-        if curtime < DomNextThink then return end
+
+		if (ply.DomNextThink or 0) > curtime then return end
 
         if heat >= 100 then
-            if curtime < DomNextTone then return end
-            DomNextTone = curtime + 0.2
-            ply:EmitSound("weapons/overheat_tone.wav", 30, 100)
+			if (ply.DomNextTone or 0) > curtime then return end
+
+            ply.DomNextTone = curtime + 0.2
+            ply:EmitSound("weapons/overheat_tone.wav", 30, 100, 1, CHAN_ITEM)
         end
 
         if heat < 120 then
-            DomNextThink = curtime + 0.017
+            ply.DomNextThink = curtime + 0.017
         end
 
         if heat > 0 then
@@ -129,9 +158,9 @@ local NPCSoldiersModels = {
 
 hook.Add("OnEntityCreated", "ST_ReskinTroops", function(ent)
 	local getcl = ent:GetClass()
-	
+
 	if getcl == "npc_citizen" then
-		timer.Simple(1, function()
+		timer.Simple(0, function()
 			if IsValid(ent) then
 				ent:SetModel(NPCSoldiersModels[math.random(#NPCSoldiersModels)])
 				ent:Give( math.random(1, 10) > 5 and "st_carbine_shotgun" or "st_carbine_short" )
@@ -139,7 +168,7 @@ hook.Add("OnEntityCreated", "ST_ReskinTroops", function(ent)
 			end
 		end)
 	elseif getcl == "npc_barney" then
-		timer.Simple(1, function()
+		timer.Simple(0, function()
 			if IsValid(ent) then
 				ent:SetModel("models/barneystormtrooper.mdl")
 				ent:SetColor(Color(190, 190, 190))
@@ -147,19 +176,83 @@ hook.Add("OnEntityCreated", "ST_ReskinTroops", function(ent)
 			end
 		end)
 	elseif getcl == "npc_antlion" then
-		timer.Simple(1, function()
-			if IsValid(ent) and math.random(1, 15) == 15 then
-				local rand = math.Rand(1.25, 1.65)
-				ent:SetModelScale(rand, 0)
-				ent:SetHealth(ent:Health() * (rand * 10))
+		timer.Simple(0, function()
+			local GAME_DIFFICULTY = GetConVar("stg_game_difficulty"):GetInt()
+			local max = math.Round(math.abs(math.Remap(GAME_DIFFICULTY, 1, 3, -30, -10)))
+
+			if IsValid(ent) and math.random(1, max) == max then
+				local rand = math.Rand(1.25, 1.55)
+
+				if ent:GetModel() == "models/antlion_worker.mdl" then
+					ent:SetModelScale(rand * 1.15, 0.01)
+				else
+					ent:SetModelScale(rand, 0.01)
+				end
+
+				local newHP = math.Round(math.Clamp(ent:GetMaxHealth() * (rand * 8), 20, 1000))
+
+				ent:SetMaxHealth(newHP)
+				ent:SetHealth(newHP)
+
 				ent:SetColor(Color(255, 160, 160))
+				ent.giant = true
 			end
 		end)
 	end
 end)
 
+function GM:GetDeathNoticeEntityName( ent )
+
+	if ( isstring( ent ) ) then return ent end
+	if ( !IsValid( ent ) ) then return nil end
+
+	-- Some specific HL2 NPCs, just for fun
+	if ( ent:GetClass() == "npc_citizen" ) then
+		if ( ent:GetName() == "griggs" ) then return "#npc_citizen_griggs" end
+		if ( ent:GetName() == "sheckley" ) then return "#npc_citizen_sheckley" end
+		if ( ent:GetName() == "tobias" ) then return "#npc_citizen_laszlo" end
+		if ( ent:GetName() == "stanley" ) then return "#npc_citizen_sandy" end
+		if ( ent:GetName() == "Machine_Gunner" ) then return "Machine Gunner" end
+		if ( ent:GetName() == "template_Marine_1" || ent:GetName() == "template_Marine_2" ) then return "Marine Soldier" end
+	end
+
+	if ent:GetClass() == "npc_barney" and ent:GetName() == "Lieutenant" then return "Lieutenant" end
+
+	if ( ent:GetClass() == "npc_sniper" and ( ent:GetName() == "alyx_sniper" || ent:GetName() == "sniper_alyx" ) ) then return "#npc_alyx" end
+
+	-- Custom vehicle and NPC names from spawnmenu
+	if ( ent:IsVehicle() ) then
+		local vehTable = list.GetEntry( "Vehicles", ent.VehicleName )
+		if ( vehTable and vehTable.Name ) then return vehTable.Name end
+	elseif ( ent:IsNPC() ) then
+		local npcTable = list.GetEntry( "NPC", ent.NPCName )
+		if ( npcTable and npcTable.Name ) then return npcTable.Name end
+	end
+
+	if ent:GetClass() == "npc_antlion" then
+		if ent:GetModel() == "models/antlion_worker.mdl" then
+			if ent.giant then
+				return "Giant Antlion Worker"
+			else
+				return "Antlion Worker"
+			end
+		else
+			if ent.giant then
+				return "Major Antlion"
+			else
+				return "Antlion"
+			end
+		end
+	end
+
+	-- Fallback to old behavior
+	return "#" .. ent:GetClass()
+
+end
+
 function GM:PlayerShouldTakeDamage(ply, attacker)
-    if attacker:IsValid() and attacker:IsPlayer() then return false end
+    if attacker:IsPlayer() then return false end
+	if attacker:GetClass() == "npc_citizen" or attacker:GetClass() == "npc_barney" then return false end
 
     return true
 end
@@ -259,9 +352,9 @@ local ST_FriendNPC = {
 
 function GM:EntityTakeDamage(target, dmginfo)
     if ST_FriendNPC[target:GetClass()] then
-        local pl = dmginfo:GetAttacker()
+        local attacker = dmginfo:GetAttacker()
 
-        if pl:IsPlayer() then
+        if attacker:IsPlayer() or ST_FriendNPC[attacker:GetClass()] then
             dmginfo:SetDamage(0)
         end
     end
@@ -272,19 +365,21 @@ function GM:PlayerDeath( pl )
 end
 
 hook.Add("DoPlayerDeath", "drop", function(pl, attacker)
-    if pl:GetActiveWeapon():IsValid() then
+	local getWeapon = pl:GetActiveWeapon()
+
+    if IsValid(getWeapon) then
         local drop = ents.Create("item_droppedweapon")
-        drop:SetModel(pl:GetActiveWeapon():GetModel())
-        drop:SetPos(pl:GetActiveWeapon():GetPos())
-        drop:SetAngles(pl:GetActiveWeapon():GetAngles())
+        drop:SetModel(getWeapon:GetModel())
+        drop:SetPos(getWeapon:GetPos())
+        drop:SetAngles(getWeapon:GetAngles())
         drop:SetSolid(SOLID_VPHYSICS)
         drop:PhysicsInit(SOLID_VPHYSICS)
         drop:Spawn()
         drop:Activate()
         drop:SetMoveType(MOVETYPE_VPHYSICS)
         drop:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
-        local phys = drop:GetPhysicsObject()
 
+        local phys = drop:GetPhysicsObject()
         if IsValid(phys) then
             phys:AddAngleVelocity(VectorRand() * math.Rand(20, 50))
             phys:AddVelocity(pl:GetVelocity())
@@ -295,7 +390,7 @@ end)
 
 function GM:PlayerDeathThink(pl)
     if pl.NextSpawnTime and pl.NextSpawnTime > CurTime() - 4 then return end
-	
+
 	if pl:Team() ~= TEAM_SPECTATOR then
 		pl:Spawn()
 	end
@@ -328,13 +423,6 @@ function GM:PlayerDisconnected(pl)
         end
     end
 end
-
-gameevent.Listen("player_disconnect")
-hook.Add("player_disconnect", "player_disconnect_msg", function(data)
-    local name = data.name
-    local reason = data.reason
-    PrintMessage(HUD_PRINTTALK, name .. " left the game (" .. reason .. ")")
-end)
 
 net.Receive("TeamSelect", function(length, pl)
     local variant = net.ReadInt(4)
@@ -411,6 +499,8 @@ net.Receive("TeamSelect", function(length, pl)
     end
 end)
 
+local pm = FindMetaTable("Player")
+
 function pm:GameSync()
 	net.Start("GameState")
 	net.WriteInt(GAMEMODE:GetGameState(), 4)
@@ -427,20 +517,41 @@ timer.Simple(3, function()
 	RunConsoleCommand("ai_ignoreplayers", "0")
 	RunConsoleCommand("ai_serverragdolls", "0")
 	RunConsoleCommand("npc_citizen_auto_player_squad", "0")
-	
+
+	--RunConsoleCommand("ai_LOS_mode", "1")
+
 	RunConsoleCommand("sbox_noclip", "0")
 	RunConsoleCommand("sbox_godmode", "0")
 	RunConsoleCommand("sv_kickerrornum", "0")
 
-	RunConsoleCommand("sk_antlion_health", "40")
-	RunConsoleCommand("sk_antlion_swipe_damage", "15")
-	RunConsoleCommand("sk_antlion_jump_damage", "10")
+	local GAME_DIFFICULTY = GetConVar("stg_game_difficulty"):GetInt()
+
+	RunConsoleCommand("sk_antlion_health", math.Round(math.Remap(GAME_DIFFICULTY, 1, 3, 20, 60)))
+	RunConsoleCommand("sk_antlion_swipe_damage", math.Round(math.Remap(GAME_DIFFICULTY, 1, 3, 10, 20)))
+	RunConsoleCommand("sk_antlion_jump_damage", math.Round(math.Remap(GAME_DIFFICULTY, 1, 3, 5, 15)))
 
 	RunConsoleCommand("sv_allowcslua", "0")
 	RunConsoleCommand("r_shadows", "0")
 	RunConsoleCommand("r_drawmodeldecals", "0")
-	
+
 	RunConsoleCommand("cl_threaded_bone_setup", "0")
 	
 	MsgC(Color(100, 255, 100), "# Loading game settings successfully completed!\n")
 end)
+
+cvars_OnConVarChanged = cvars_OnConVarChanged or cvars.OnConVarChanged
+
+function cvars.OnConVarChanged( name, oldVal, newVal )
+    cvars_OnConVarChanged( name, oldVal, newVal )
+    hook.Run( "OnConVarChanged", name, oldVal, newVal )
+end
+
+hook.Add("OnConVarChanged", "OnChangeGameDifficulty", function(name, oldValue, newValue)
+    if name == "stg_game_difficulty" then
+        RunConsoleCommand("sk_antlion_health", math.Round(math.Remap(newValue, 1, 3, 20, 60)))
+		RunConsoleCommand("sk_antlion_swipe_damage", math.Round(math.Remap(newValue, 1, 3, 10, 20)))
+		RunConsoleCommand("sk_antlion_jump_damage", math.Round(math.Remap(newValue, 1, 3, 5, 15)))
+    end
+end)
+
+

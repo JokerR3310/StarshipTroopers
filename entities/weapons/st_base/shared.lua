@@ -52,9 +52,14 @@ function SWEP:GetNPCBulletSpread( proficiency )
 end
 
 function SWEP:Deploy()
-	self:SendWeaponAnim( ACT_VM_DRAW )
+	self:SendWeaponAnim(ACT_VM_DRAW)
+	self:SetHoldType(self.HoldType)
 
 	return true
+end
+
+function SWEP:Think()
+	self:IronSight()
 end
 
 function SWEP:Precache()
@@ -129,6 +134,7 @@ function SWEP:PrimaryAttack()
 
 	if user:IsPlayer() then
 		self:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+
 		user:ViewPunch(Angle(math.Rand(-1, 1), math.Rand(-1, 1), 0))
 	end
 
@@ -150,14 +156,7 @@ function SWEP:FireShotPrim()
 	bullet.Tracer = 2
 	bullet.TracerName = self.Primary.TracerName
 	bullet.Force = 10
-
-	if SERVER then
-		local GAME_DIFFICULTY = GetConVar("stg_game_difficulty"):GetInt()
-		local max = math.Round(math.Remap(GAME_DIFFICULTY, 1, 3, 6, 0))
-
-		bullet.Damage = math.Round(math.random(self.Primary.DamageMin,self.Primary.DamageMax) + max)
-	end
-
+	bullet.Damage = math.random(self.Primary.DamageMin, self.Primary.DamageMax)
 	bullet.AmmoType = self.Primary.Ammo
 
 	if user:IsNPC() then
@@ -233,4 +232,7 @@ function SWEP:Reload()
 			end
 		end
 	end
+end
+
+function SWEP:IronSight()
 end

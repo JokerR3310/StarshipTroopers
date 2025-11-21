@@ -39,6 +39,14 @@ function SWEP:Holster()
 end
 
 function SWEP:PrimaryAttack()
+	local user = self:GetOwner()
+
+	if user:IsPlayer() and user:GetAmmoCount( "Grenade" ) > 0 and user:KeyDown(IN_USE) then
+		self:ThrowGrenade()
+
+		return
+	end
+
 	if self:CanPrimaryAttack() then
 		self:ExplodeShot()
 		self.Weapon:EmitSound(self.Primary.Sound)

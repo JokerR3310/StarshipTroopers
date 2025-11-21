@@ -7,15 +7,12 @@ end
 
 if CLIENT then
 	local function GetAttachPosition(t)
-	
-	-- From HL2 bone
-	local bone = t:LookupBone("ValveBiped.Bip01_Spine2")
+		-- From HL2 bone
+		local bone = t:LookupBone("ValveBiped.Bip01_Spine2")
 		if bone then return t:GetBonePosition(bone) end
-	
-	-- From bounding box center
-	local pos = _R.Vector.__add(t:WorldSpaceAABB())
-		pos:Mul(0.5)
-		return pos
+
+		-- From bounding box center
+		return t:WorldSpaceCenter()
 	end
 
 	function ENT:Think()

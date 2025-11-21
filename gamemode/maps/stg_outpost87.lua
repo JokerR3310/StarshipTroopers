@@ -1,7 +1,7 @@
 ////////// Map Config File \\\\\\\\\\\
 //									\\
 //		Map: 		STG_OUTPOST 87	\\		
-//		Author: 	JokerR			\\
+//		Author: 	Tysn (Obsidian Conflict)
 //		Version: 	Stable(Beta) 	\\
 //									\\
 // // // // // // || \\ \\ \\ \\ \\ \\

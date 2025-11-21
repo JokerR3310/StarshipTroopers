@@ -5,7 +5,7 @@ SWEP.Slot			= 2
 SWEP.SlotPos		= 2
 SWEP.Category		= "SST Weapons 2"
 
-SWEP.Author			= "-=JokerR |CMBG|=-"
+SWEP.Author			= "JokerR"
 SWEP.WepSelectIcon	= surface.GetTextureID("weapons/st_carbine_sniper")
 
 function SWEP:Initialize()
@@ -33,11 +33,10 @@ local elcansight = surface.GetTextureID("scope/gdcw_elcansight")
 local svdsight = surface.GetTextureID("scope/gdcw_svdsight")
 
 function SWEP:DrawHUD()
-	if self.Owner:KeyDown(IN_ATTACK2) and not self.Weapon:GetNWBool("Reloading") then
-		render.OverrideBlend( false )
+	if self.Owner:KeyDown(IN_ATTACK2) and not self:GetNWBool("Reloading") then
 		surface.SetTexture(elcansight)
 		surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
-		
+
 		surface.SetTexture(svdsight)
 		surface.DrawTexturedRect(self.LensTable.x, self.LensTable.y, self.LensTable.w, self.LensTable.h)
 	else
@@ -46,7 +45,7 @@ function SWEP:DrawHUD()
 end
 
 function SWEP:AdjustMouseSensitivity()
-	if self.Owner:KeyDown(IN_ATTACK2) and not self.Weapon:GetNWBool("Reloading") then
+	if self.Owner:KeyDown(IN_ATTACK2) and not self:GetNWBool("Reloading") then
 		return 0.1
     end
 end

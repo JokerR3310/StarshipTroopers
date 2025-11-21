@@ -103,9 +103,9 @@ function PANEL:Init()
 
  •  Starship Troopers Gamemode
 
- •  Author:  -=JokerR |CMBG|=-
+ •  Author:  JokerR
 
- •  Version: "Open Beta 0.8.1" | 03/06/2023
+ •  Version: "Open Beta 0.8.3" | 21/11/2025
 ]])
 		self.Info:SetTextColor(Color(0, 0, 0, 255))
 		self.Info:SetPos(5, 20)

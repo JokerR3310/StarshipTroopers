@@ -5,6 +5,17 @@ function ENT:Initialize()
 	self:SetupDataTables() -- we need to do this manually because SNPCs do not support clientside scripts
 end
 
+if game.SinglePlayer() then
+	net.Receive("SinglePlayerHealthNetwork", function()
+		local entity = net.ReadEntity()
+		local health = net.ReadUInt(18)
+
+		if IsValid(entity) then
+			entity:SetHealth(health)
+		end
+	end)
+end
+
 local Scrw_x, Scrw_y = ScrW()/2, ScrH()/2
 local function DrawBuilingsInfo()
 	if LocalPlayer():GetEyeTrace().Entity.Building then

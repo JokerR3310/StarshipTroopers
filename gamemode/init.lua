@@ -36,11 +36,11 @@ include("sv_round.lua")
 include("sh_round.lua")
 include("sh_gamestate.lua")
 
-util.AddNetworkString( "TeamSelect" )
-util.AddNetworkString( "OpenTeamSelect" )
-util.AddNetworkString( "OpenHelpMenu" )
+util.AddNetworkString("TeamSelect")
+util.AddNetworkString("OpenTeamSelect")
+util.AddNetworkString("OpenHelpMenu")
 
-resource.AddWorkshop( "197393073" )
+resource.AddWorkshop("197393073")
 
 CreateConVar("stg_game_difficulty", "2", FCVAR_NOTIFY, "Game difficulty convar: 1 - Easy, 2 - Normal, 3 - Hard", 1, 3)
 
@@ -58,7 +58,15 @@ function GM:PlayerInitialSpawn( pl )
 	pl:GameSync()
 end
 
-timer.Create("TauntCooldown", 2, 0, function() 
+hook.Add("Think", "DIFFICULTY_Clamp", function()
+	local GAME_DIFFICULTY = GetConVar("stg_game_difficulty")
+
+	if GAME_DIFFICULTY:GetInt() < 1 or GAME_DIFFICULTY:GetInt() > 5 then
+		GAME_DIFFICULTY:Revert()
+	end
+end)
+
+timer.Create("TauntCooldown", 3, 0, function() 
 	for _, ply in ipairs(player.GetAll()) do
 		if ply:Alive() then
 			ply:SetNetVar("Taunt", false)
@@ -111,7 +119,7 @@ function GM:PlayerPostThink(ply)
 	local curtime = CurTime()
 
 	if ArmorNextThink < curtime then
-		if ply:Alive() and ply:Armor() < 100 and (ply.NextArmorRegen or 0) < curtime then
+		if ply:Alive() and ply:Armor() < 100 and (ply.nextArmorRegen or 0) < curtime then
 			ply:SetArmor( ply:Armor() + 1 )
 		end
 
@@ -140,8 +148,8 @@ function GM:PlayerPostThink(ply)
     end
 end
 
-function GM:PlayerHurt(pl)
-	pl.NextArmorRegen = (CurTime() + 3.5)
+function GM:PlayerHurt(ply)
+	ply.nextArmorRegen = (CurTime() + 4)
 end
 
 local NPCSoldiersModels = {
@@ -321,28 +329,38 @@ local male_snd = {
 	"vo/episode_1/npc/male01/cit_kill20.wav"
 }
 
-hook.Add("OnNPCKilled", "OnNPCKilled", function(npc, attacker)
-	if attacker:IsPlayer() then
+local function doVoiceTaunt(ply)
+	if math.random(1, 8) ~= 8 then return end
+
+	if not ply:GetNetVar("Taunt", false) then
+		local getgender = string.find(string.lower(ply:GetModel()), "mobileinfantry/fmi")
+
+		if getgender then
+			ply:EmitSound(Sound(female_snd[math.random(#female_snd)]))
+		else
+			ply:EmitSound(Sound(male_snd[math.random(#male_snd)]))
+		end
+
+		ply:SetNetVar("Taunt", true)
+	end
+end
+
+hook.Add("OnNPCKilled", "OnNPCKilled", function(npc, attacker, inflictor)
+	if IsValid(attacker) and attacker:IsPlayer() and IsValid(npc) then
 		local getclass = npc:GetClass()
 
         if ST_NPCReward[getclass] then
-			if math.random(10) > 6 and not attacker:GetNetVar("Taunt", false) then
-				local getgender = string.find(string.lower(attacker:GetModel()), "mobileinfantry/fmi")
-
-				if getgender then
-					attacker:EmitSound(Sound(female_snd[math.random(#female_snd)]))
-				else
-					attacker:EmitSound(Sound(male_snd[math.random(#male_snd)]))
-				end
-
-				attacker:SetNetVar("Taunt", true)
-			end
-
 			local bonus = npc:GetColor() == Color(255, 160, 160) and ST_NPCReward[getclass] * 5 or ST_NPCReward[getclass]
             attacker:SetNetVar("Credits", attacker:GetNetVar("Credits", 0) + bonus)
             attacker:AddFrags(bonus)
+
+			doVoiceTaunt(attacker)
         end
     end
+
+	if IsValid(inflictor) and inflictor:GetClass() == "obj_sentrygun" then
+		inflictor:SetNetVar("setryKills", inflictor:GetNetVar("setryKills", 0) + 1)
+	end
 end)
 
 local ST_FriendNPC = {
@@ -351,17 +369,30 @@ local ST_FriendNPC = {
 }
 
 function GM:EntityTakeDamage(target, dmginfo)
-    if ST_FriendNPC[target:GetClass()] then
-        local attacker = dmginfo:GetAttacker()
+    if IsValid(target) then
+		if ST_FriendNPC[target:GetClass()] then
+			local attacker = dmginfo:GetAttacker()
 
-        if attacker:IsPlayer() or ST_FriendNPC[attacker:GetClass()] then
-            dmginfo:SetDamage(0)
-        end
-    end
+			if attacker:IsPlayer() or ST_FriendNPC[attacker:GetClass()] then
+				dmginfo:SetDamage(0)
+			end
+		end
+
+		-- workaround for invincible npc_antlion (Worker)
+		if target:IsNPC() and target:Health() <= 0 then
+			if target.removeAfter then
+				if target.removeAfter < CurTime() then
+					target:Remove()
+				end
+			else
+				target.removeAfter = CurTime() + 3
+			end
+		end
+	end
 end
 
-function GM:PlayerDeath( pl )
-	pl.NextSpawnTime = CurTime() + 3
+function GM:PlayerDeath(ply)
+	ply.NextSpawnTime = CurTime() + 3
 end
 
 hook.Add("DoPlayerDeath", "drop", function(pl, attacker)
@@ -388,30 +419,30 @@ hook.Add("DoPlayerDeath", "drop", function(pl, attacker)
     end
 end)
 
-function GM:PlayerDeathThink(pl)
-    if pl.NextSpawnTime and pl.NextSpawnTime > CurTime() - 4 then return end
+function GM:PlayerDeathThink(ply)
+    if ply.NextSpawnTime and ply.NextSpawnTime > CurTime() - 4 then return end
 
-	if pl:Team() ~= TEAM_SPECTATOR then
-		pl:Spawn()
+	if ply:Team() ~= TEAM_SPECTATOR then
+		ply:Spawn()
 	end
 end
 
 function GM:GetFallDamage(pl, speed)
-    return math.max(0, math.ceil(0.2418 * speed - 141.75))
+    return math.max(0, math.ceil(0.2418 * speed - 111.75))
 end
 
 function GM:PlayerSwitchFlashlight()
     return false
 end
 
-function GM:PlayerUse(pl)
-    if pl:Team() == TEAM_SPECTATOR then return false end
+function GM:PlayerUse(ply)
+    if ply:Team() == TEAM_SPECTATOR then return false end
 
     return true
 end
 
-function GM:CanPlayerSuicide(pl)
-    if pl:Team() == TEAM_SPECTATOR then return false end
+function GM:CanPlayerSuicide(ply)
+    if ply:Team() == TEAM_SPECTATOR then return false end
 
     return true
 end
@@ -424,8 +455,9 @@ function GM:PlayerDisconnected(pl)
     end
 end
 
-net.Receive("TeamSelect", function(length, pl)
-    local variant = net.ReadInt(4)
+net.Receive("TeamSelect", function(_, pl)
+    local variant = net.ReadUInt(3)
+    if not variant then return end
 
     if variant == 1 then
         player_manager.SetPlayerClass(pl, "player_soldier")
@@ -433,7 +465,7 @@ net.Receive("TeamSelect", function(length, pl)
         if pl:Team() == TEAM_SPECTATOR then
             pl:SetTeam(1)
             pl:Spawn()
-			PrintMessage( HUD_PRINTTALK, pl:Name().. " assigned to team DEFENDERS" )
+			PrintMessage( HUD_PRINTTALK, pl:Name() .. " assigned to team DEFENDERS" )
         else
             pl:SetTeam(1)
 
@@ -449,7 +481,7 @@ net.Receive("TeamSelect", function(length, pl)
         if pl:Team() == TEAM_SPECTATOR then
             pl:SetTeam(2)
             pl:Spawn()
-			PrintMessage( HUD_PRINTTALK, pl:Name().. " assigned to team DEFENDERS" )
+			PrintMessage( HUD_PRINTTALK, pl:Name() .. " assigned to team DEFENDERS" )
         else
             pl:SetTeam(2)
 
@@ -465,7 +497,7 @@ net.Receive("TeamSelect", function(length, pl)
         if pl:Team() == TEAM_SPECTATOR then
             pl:SetTeam(1)
             pl:Spawn()
-			PrintMessage( HUD_PRINTTALK, pl:Name().. " assigned to team DEFENDERS" )
+			PrintMessage( HUD_PRINTTALK, pl:Name() .. " assigned to team DEFENDERS" )
         else
             pl:SetTeam(1)
 
@@ -481,7 +513,7 @@ net.Receive("TeamSelect", function(length, pl)
         if pl:Team() == TEAM_SPECTATOR then
             pl:SetTeam(1)
             pl:Spawn()
-			PrintMessage( HUD_PRINTTALK, pl:Name().. " assigned to team DEFENDERS" )
+			PrintMessage( HUD_PRINTTALK, pl:Name() .. " assigned to team DEFENDERS" )
         else
             pl:SetTeam(1)
 
@@ -495,7 +527,7 @@ net.Receive("TeamSelect", function(length, pl)
         pl:SetTeam(TEAM_SPECTATOR)
         pl:KillSilent()
         pl:Spectate(OBS_MODE_ROAMING)
-		PrintMessage( HUD_PRINTTALK, pl:Name().. " assigned to team SPECTATORS" )
+		PrintMessage( HUD_PRINTTALK, pl:Name() .. " assigned to team SPECTATORS" )
     end
 end)
 
@@ -553,5 +585,3 @@ hook.Add("OnConVarChanged", "OnChangeGameDifficulty", function(name, oldValue, n
 		RunConsoleCommand("sk_antlion_jump_damage", math.Round(math.Remap(newValue, 1, 3, 5, 15)))
     end
 end)
-
-

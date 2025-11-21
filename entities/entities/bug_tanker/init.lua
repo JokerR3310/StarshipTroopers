@@ -13,7 +13,7 @@ ENT.iHullCustomVectorMin = Vector(150, 150, 200)
 ENT.iHullCustomVectorMax = Vector(-150, -150, 0) 
 
 ENT.MaxYawSpeed = 8
-ENT.MaxHealth = 16000
+ENT.MaxHealth = 8000
 
 function ENT:stb_OnInit() 
 	self.flame_effect = ents.Create( "info_particle_system" ) 

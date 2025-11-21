@@ -43,7 +43,7 @@ Model("models/buildables/Gibs/sentry2_Gib4.mdl"),
 ENT.Gibs = SentryGibs1
 ENT.Sound_Explode = Sound("Building_Sentry.Explode")
 
-ENT.BaseDamage = 2
+ENT.BaseDamage = 3
 
 ENT.OriginZOffset = 40
 
@@ -143,7 +143,7 @@ function ENT:TakeAmmo1(a)
 end
 
 function ENT:OnStartBuilding()
-	self.BaseDamage = 2
+	self.BaseDamage = 3
 	self.UpgradeRate = 15
 end
 

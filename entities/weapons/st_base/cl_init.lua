@@ -5,7 +5,7 @@ SWEP.Slot				= 0
 SWEP.SlotPos			= 0
 SWEP.Category			= "SST Weapons 2"
 
-SWEP.Author				= "-=JokerR |CMBG|=-"
+SWEP.Author				= "JokerR"
 SWEP.Contact			= "http://steamcommunity.com/id/Joker-UA/"
 
 SWEP.DrawCrosshair		= true

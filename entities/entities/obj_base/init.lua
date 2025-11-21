@@ -3,6 +3,10 @@ AddCSLuaFile("cl_init.lua")
 
 include("shared.lua")
 
+if game.SinglePlayer() then
+	util.AddNetworkString("SinglePlayerHealthNetwork")
+end
+
 ENT.Levels = {}
 ENT.Gibs = {}
 
@@ -229,7 +233,18 @@ function ENT:Think()
 	elseif state==3 then
 		self:OnThinkActive()
 	end
-	
+
+	-- Workaround for Health network
+	-- https://github.com/Facepunch/garrysmod-issues/issues/6473
+	if game.SinglePlayer() and (self.nextTransmitHealtCheck or 0) < CurTime() then
+		net.Start("SinglePlayerHealthNetwork")
+			net.WriteEntity(self)
+			net.WriteUInt(self:Health(), 18)
+		net.Broadcast()
+
+		self.nextTransmitHealtCheck = CurTime() + 0.2
+	end
+
 	self:NextThink(CurTime())
 	return true
 end
@@ -238,9 +253,7 @@ function ENT:OnTakeDamage(dmginfo)
 	if dmginfo:GetAttacker():IsPlayer() then 
 		dmginfo:SetDamage(0) 
 	end
-	
-	if game.SinglePlayer() and self:GetState() == 3 then self:RestartGesture(ACT_RANGE_ATTACK1) end
-	
+
 	self:SetHealth(self:Health() - dmginfo:GetDamage())
 	if not self.BuildSubstractHealth then
 		self.BuildSubstractHealth = 0

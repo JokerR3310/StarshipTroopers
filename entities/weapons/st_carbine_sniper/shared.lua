@@ -23,7 +23,7 @@ SWEP.Secondary.ScopeZoom = 10
 SWEP.ScopeScale = 0.5
 
 function SWEP:Initialize()
-	self.Weapon:SetNWBool("Reloading", false)
+	self:SetNWBool("Reloading", false)
 	self:SetHoldType(self.HoldType)
 end
 
@@ -37,7 +37,8 @@ end
 
 function SWEP:Holster()
 	self.Owner:SetFOV(0, 0.2)
-		return true
+
+	return true
 end
 
 function SWEP:Reload()
@@ -80,13 +81,9 @@ function SWEP:PostReloadScopeCheck()
 	end
 end
 
-function SWEP:Think()
-	self:IronSight()
-end
-
 function SWEP:IronSight()
 	if not IsValid(self) then return end
-	
+
 	if self.Owner:KeyPressed(IN_ATTACK2) and not self.Weapon:GetNWBool("Reloading") then
 		self.Owner:SetFOV(75 / self.Secondary.ScopeZoom, 0.15)
 			self.Primary.Spread = 0.002

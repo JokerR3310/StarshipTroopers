@@ -46,6 +46,8 @@ function ENT:StartSupply(pl)
 	target:AttachToEntity(pl)
 	target:SetName(tostring(target))
 
+	self:DeleteOnRemove(target)
+
 	local effect = ents.Create("info_particle_system")
 	effect:SetKeyValue("effect_name", "dispenser_heal_red")
 	effect:SetKeyValue("cpoint1", target:GetName())
@@ -130,7 +132,7 @@ function ENT:OnThinkActive()
 	if not self.NextSearch or CurTime()>=self.NextSearch then
 		local removedclients = table.Copy(self.Clients)
 		for _,v in pairs(ents.FindInSphere(self:GetPos(), self.Range)) do
-			if v:IsPlayer() and v:Alive() then
+			if (v:IsPlayer() or (v:IsNPC() and v:GetClass() == "npc_citizen")) and v:Alive() then
 				if self.Clients[v] then
 					-- Don't remove that client
 					removedclients[v] = nil
@@ -139,11 +141,11 @@ function ENT:OnThinkActive()
 				end
 			end
 		end
-		
+
 		for k,_ in pairs(removedclients) do
 			self:StopSupply(k)
 		end
-		
+
 		self.NextSearch = CurTime() + 0.2
 	end
 	

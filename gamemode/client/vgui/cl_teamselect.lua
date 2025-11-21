@@ -7,7 +7,7 @@ function PANEL:Init()
 	self:ShowCloseButton(false)
 	self:SetDraggable(false)
 	self:MakePopup()
-	
+
 	local SoldiersModels = {
 		"models/mobileinfantry/fmi_01.mdl",
 		"models/mobileinfantry/fmi_02.mdl",
@@ -36,8 +36,9 @@ function PANEL:Init()
 	self.btn:SetText( "Soldier" )
 	self.btn.DoClick = function()
 		net.Start("TeamSelect")
-		net.WriteInt(1, 4)
+		net.WriteUInt(1, 3)
 		net.SendToServer()
+
 		self:Close()
 	end
 
@@ -52,8 +53,9 @@ function PANEL:Init()
 	self.btn2:SetText( "Engineer" )
 	self.btn2.DoClick = function()
 		net.Start("TeamSelect")
-		net.WriteInt(2, 4)
+		net.WriteUInt(2, 3)
 		net.SendToServer()
+
 		self:Close()
 	end
 
@@ -85,8 +87,9 @@ function PANEL:Init()
 	self.btn3:SetText( "Medic" )
 	self.btn3.DoClick = function()
 		net.Start("TeamSelect")
-		net.WriteInt(3, 4)
+		net.WriteUInt(3, 3)
 		net.SendToServer()
+
 		self:Close()
 	end
 
@@ -101,8 +104,9 @@ function PANEL:Init()
 	self.btn4:SetText( "Sniper" )
 	self.btn4.DoClick = function()
 		net.Start("TeamSelect")
-		net.WriteInt(4, 4)
+		net.WriteUInt(4, 3)
 		net.SendToServer()
+
 		self:Close()
 	end
 
@@ -117,8 +121,9 @@ function PANEL:Init()
 	self.btnr:SetText( "Spectator" )
 	self.btnr.DoClick = function()
 		net.Start("TeamSelect")
-		net.WriteInt(5, 4)
+		net.WriteUInt(5, 3)
 		net.SendToServer()
+
 		self:Close()
 	end
 	

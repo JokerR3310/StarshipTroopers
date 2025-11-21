@@ -46,6 +46,9 @@ local hp = Material("hud_elements/hp.png")
 local heart = Material("icon16/heart.png")
 local bug = Material("icon16/bug.png")
 
+local barW, barH = 420, 24
+local grad = Material("vgui/gradient-l")
+
 function GM:HUDDrawTargetID()
 
 	local trace = LocalPlayer():GetEyeTrace()
@@ -142,26 +145,46 @@ hook.Add("HUDPaint", "HUDDrawPaint", function()
 		draw.SimpleTextOutlined("Setup", "st_timer_text", middle, 69, Color(255, 255, 255, 155), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1.4, Color(0,0,0))	
 	end
 
-	for _, v in pairs(ents.FindByClass("bug_tanker")) do
-		if IsValid(v) and v:Health() > 0 then
-			local hpbar = math.Clamp(v:Health() * 0.0262, 0, 418)
+	for _, v in ipairs(ents.FindByClass("bug_tanker")) do
+		if not IsValid(v) or v:Health() <= 0 then continue end
+		
+		draw.RoundedBox(4, middle - 215, 86, 430, 32, Color(41, 41, 41, 120))
 
-			draw.RoundedBox(0, middle - 240, 90, 480, 40, Color(17, 17, 17, 100))
-			surface.SetDrawColor(Color(17, 117, 200, 255))
-			surface.DrawOutlinedRect(middle - 240, 90, 480, 40)
-			
-			
-			
-			
-			
-			draw.RoundedBox(0, middle - 190, 100, 420, 20, Color(128, 128, 128, 200))
-			draw.RoundedBox(0, middle - 189, 101, hpbar, 18, Color(165, 60, 60, 180))
+		local hp = v:Health()
+		local max = v:GetMaxHealth()
+		local frac = math.Clamp(hp / max, 0, 1)
+		local hpW = barW * frac
 
-			surface.SetDrawColor(color_white)
-			surface.SetMaterial(bug)
-			surface.DrawTexturedRect(middle - 220, 103, 16, 16)
-		end
+		local x = middle - barW / 2
+		local y = 90
+
+		-- Фоновый тёмный градиент
+		surface.SetMaterial(grad)
+		surface.SetDrawColor(100, 50, 50, 255)
+		surface.DrawTexturedRect(x, y, barW, barH)
+
+		-- Золотая полоса HP
+		surface.SetDrawColor(200, 170, 70, 255)
+		surface.DrawRect(x, y, hpW, barH)
+
+		-- Светлая рамка
+		surface.SetDrawColor(220, 210, 150, 255)
+		surface.DrawOutlinedRect(x, y, barW, barH)
+
+		-- Текст HP c мягкой тенью
+		local hpText = string.Comma( hp, " " )
+
+		draw.SimpleTextOutlined(hpText, "st_timer_text", middle, y + 11, Color(255, 255, 255, 185), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER, 1, color_black)
+
+		-- иконка справа
+		surface.SetDrawColor(255, 255, 255)
+		surface.SetMaterial(bug)
+		surface.DrawTexturedRect(x + barW + 12, y - 4, 32, 32)
+		
+		surface.DrawTexturedRect(x - 44, y - 4, 32, 32)
 	end
+	
+	
 
 	if not LocalPlayer():Alive() then return end
 
@@ -247,20 +270,25 @@ hook.Add("HUDPaint", "HUDDrawPaint", function()
 					draw.SimpleTextOutlined("+", "DermaLarge", 32.3, 195, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
 				-- Ammo --
 				if v:GetState() == 3 then
-					draw.SimpleTextOutlined("Shells:", "Default", 74, 165, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
-			
-					draw.RoundedBox(0, 40, 166, 120, 12, Color(65, 65, 65, 250))
-					draw.RoundedBox(0, 40, 166, v:GetAmmo1Percentage() * 120, 12, Color(225, 225, 225, 200))
+					draw.SimpleTextOutlined("Shells:", "Default", 74, 191, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
+
+					draw.RoundedBox(0, 40, 192, 120, 12, Color(65, 65, 65, 250))
+					draw.RoundedBox(0, 40, 192, v:GetAmmo1Percentage() * 120, 12, Color(225, 225, 225, 200))
+
 				-- Progress --
 					if v:GetLevel() == 1 then
-						draw.SimpleTextOutlined("Upgrade:", "Default", 85, 191, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
+						draw.SimpleTextOutlined("Upgrade:", "Default", 85, 165, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
 
-						draw.RoundedBox(0, 40, 192, 120, 12, Color(65, 65, 65, 250))
-						draw.RoundedBox(0, 40, 192, v:GetMetal() * 0.6, 12, Color(225, 225, 225, 200))
+						draw.RoundedBox(0, 40, 166, 120, 12, Color(65, 65, 65, 250))
+						draw.RoundedBox(0, 40, 166, v:GetMetal() * 0.6, 12, Color(225, 225, 225, 200))
+					elseif v:GetLevel() == 2 then -- Kills
+						draw.SimpleTextOutlined("Kills:", "Default", 41, 165, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, Color(74, 74, 74))
+
+						draw.SimpleTextOutlined(tonumber(v:GetNetVar("setryKills", 0)), "ChatFont", 72, 165, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER, 1, Color(74, 74, 74))
 					end
-				else 
+				else
 					draw.SimpleTextOutlined("Building...", "Default", 90, 175, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
-			
+
 					draw.RoundedBox(0, 40, 178, 120, 12, Color(65, 65, 65, 250))
 					draw.RoundedBox(0, 40, 178, v:GetBuildProgress() * 120, 12, Color(225, 225, 225, 200))
 				end
@@ -282,11 +310,12 @@ hook.Add("HUDPaint", "HUDDrawPaint", function()
 						draw.RoundedBox(0, 40, 235, 120, 12, Color(65, 65, 65, 250))
 						draw.RoundedBox(0, 40, 235, v:GetMetal() * 0.6, 12, Color(225, 225, 225, 200))
 					end
+
 					draw.RoundedBox(0, 40, 255, 120, 16, Color(65, 65, 65, 250))
 					draw.RoundedBox(0, 40, 255, v:GetAmmoPercentage() * 120, 16, Color(225, 225, 225, 200))
 				else 
 					draw.SimpleTextOutlined("Building...", "Default", 90, 246, color_white, TEXT_ALIGN_RIGHT, TEXT_ALIGN_BOTTOM, 1, Color(74, 74, 74))
-			
+
 					draw.RoundedBox(0, 40, 248, 120, 12, Color(65, 65, 65, 250))
 					draw.RoundedBox(0, 40, 248, v:GetBuildProgress() * 120, 12, Color(225, 225, 225, 200))
 				end

@@ -38,14 +38,23 @@ function ENT:Initialize()
 	self:SetMoveType(3)
 	
 	local comp = {CAP_MOVE_GROUND, CAP_FRIENDLY_DMG_IMMUNE, CAP_SQUAD} 
-	
-	for _,g in pairs(comp) do 
+
+	for _, g in pairs(comp) do 
 		self:CapabilitiesAdd(g) 
-	end  
-	
-	self:SetMaxYawSpeed(self.MaxYawSpeed) 
-	self:SetHealth(self.MaxHealth)
-	
+	end
+
+	self:SetMaxYawSpeed(self.MaxYawSpeed)
+
+	local GAME_DIFFICULTY = GetConVar("stg_game_difficulty"):GetInt()
+	local playerCount = player.GetCount()
+
+	local result = 45 * (playerCount ^ 2) + 1200 * (0.3 + playerCount / 10)
+	result = result * (GAME_DIFFICULTY + 2)
+	--print(self.MaxHealth + result)
+
+	self:SetMaxHealth(self.MaxHealth + result)
+	self:SetHealth(self.MaxHealth + result)
+
 	self:stb_OnInit() 
 end 
 /*
@@ -192,6 +201,15 @@ function ENT:OnTakeDamage(dmginfo) self:stb_SetVel(dmginfo)
 	--self:stb_PlaySound(self.t_Sounds["Hurt"],self.t_Sounds["HurtChance"])
 	self:stb_PlaySound(self.t_Sounds["Hurt"],20)
 	--self:stb_PlaySound(self.t_Sounds["Impact"],nil,100,100,100)  
+	
+	if game.SinglePlayer() and (self.nextTransmitHealtCheck or 0) < CurTime() then
+		net.Start("SinglePlayerHealthNetwork")
+			net.WriteEntity(self)
+			net.WriteUInt(self:Health(), 18)
+		net.Broadcast()
+
+		self.nextTransmitHealtCheck = CurTime() + 0.2
+	end
 	
 	if self:Health() <= 0 && !self.dead then 
 		self.dead = true 
